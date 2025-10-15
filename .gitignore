@@ -1,4 +1,8 @@
+# COMMON
 *.env
 *.log
 */logs
 */.idea
+
+# MIGRATIONS
+*/alembic.ini
