@@ -2,7 +2,9 @@
 *.env
 *.log
 */logs
+.idea
 */.idea
+pg_data
 
 # MIGRATIONS
 */alembic.ini
