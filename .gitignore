@@ -2,3 +2,6 @@
 *.log
 */logs
 */.idea
+
+pg_data/
+.idea/
