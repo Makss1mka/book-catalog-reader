@@ -1,7 +1,10 @@
+# COMMON
 *.env
 *.log
 */logs
+.idea
 */.idea
+pg_data
 
-pg_data/
-.idea/
+# MIGRATIONS
+*/alembic.ini
