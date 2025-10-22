@@ -1,5 +1,3 @@
-"""This module contains the global exception handlers for the FastAPI application."""
-
 from src.exceptions.code_exceptions import CodeException
 
 from fastapi.exceptions import RequestValidationError
@@ -11,16 +9,6 @@ import logging
 logger: logging.Logger = logging.getLogger(__name__)
 
 async def code_exception_handler(req: Request, ex: CodeException):
-    """Handle CodeException.
-
-    Args:
-        req (Request): current request.
-        ex (CodeException): The CodeException instance.
-
-    Returns:
-        JSONResponse: A JSON response with the error message and status code.
-    """
-
     logger.exception(f"CODE EXCEPTION: {ex.status_code} | {ex.message}")
 
     return JSONResponse(
@@ -29,16 +17,6 @@ async def code_exception_handler(req: Request, ex: CodeException):
     )
 
 async def pydantic_validation_exception_handler(req: Request, ex: RequestValidationError):
-    """Handle RequestValidationError.
-
-    Args:
-        req (Request): current request.
-        ex (RequestValidationError): The RequestValidationError instance.
-
-    Returns:
-        JSONResponse: A JSON response with the error message and status code.
-    """
-
     logger.exception(f"VALIDATION EXCEPTION: {ex.errors} | {ex.__traceback__}")
 
     return JSONResponse(

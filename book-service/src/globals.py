@@ -30,3 +30,33 @@ LOGS_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 # Routers configs
 #
 BOOKS_CRUD_ROUTER_PREFIX: str = "/books"
+AUTHORS_CRUD_ROUTER_PREFIX: str = "/authors"
+BOOK_SEARCH_ROUTER_PREFIX: str = "/search"
+BOOK_FILE_ROUTER_PREFIX: str = "/books"
+STATUS_ROUTER_PREFIX: str = "/status"
+
+#
+# File upload configs
+#
+MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
+ALLOWED_FILE_TYPES: list = ["application/pdf"]
+UPLOAD_DIR: str = "uploads/books"
+
+#
+# Pagination configs
+#
+DEFAULT_PAGE_SIZE: int = 10
+MAX_PAGE_SIZE: int = 100
+MAX_PAGE_SIZE_NON_ADMIN: int = 20
+
+#
+# Search configs
+#
+MAX_GENRES_PER_BOOK: int = 10
+MAX_SEARCH_RESULTS: int = 1000
+
+#
+# Other file vars
+#
+MAX_PAGES_PER_REQUEST: int = 10
+BOOK_FILES_PATH_DIRECTORY: str = "./books_files/"

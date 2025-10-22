@@ -1,14 +1,18 @@
-"""Annotations for dependency injection"""
-
 from src.core.db_core import get_db_session
+from src.middlewares.auth_middleware import extract_user_context
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, Request
 
 DatabaseSession = Annotated[
     AsyncSession,
     Depends(get_db_session)
+]
+
+UserContext = Annotated[
+    object,
+    Depends(extract_user_context)
 ]
 
 

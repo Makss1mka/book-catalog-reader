@@ -1,5 +1,9 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
-from src.api.manga_cruds_api import manga_crud_router
+from src.api.book_crud_router import book_crud_router
+from src.api.author_crud_router import author_crud_router
+from src.api.book_search_router import book_search_router
+from src.api.book_file_router import book_file_router
+from src.api.status_router import status_router
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
 from src.exceptions.code_exceptions import CodeException
@@ -7,6 +11,7 @@ from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
     code_exception_handler,
 )
+from src.middlewares.auth_middleware import extract_user_context
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
@@ -16,7 +21,7 @@ from src.globals import (
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 import uvicorn
 import logging
@@ -57,7 +62,18 @@ async def app_lifespan(
 
 app = FastAPI(lifespan=app_lifespan)
 
-app.include_router(manga_crud_router)
+@app.middleware("http")
+async def user_context_middleware(request: Request, call_next):
+    user_context = await extract_user_context(request)
+    request.state.user_context = user_context
+    response = await call_next(request)
+    return response
+
+app.include_router(book_crud_router)
+app.include_router(author_crud_router)
+app.include_router(book_search_router)
+app.include_router(book_file_router)
+app.include_router(status_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)

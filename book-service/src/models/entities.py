@@ -13,8 +13,11 @@ class AuthorProfile(Base):
     name = Column(String, nullable=False)
     rating = Column(Float, default=0.0)
     common_genres = Column(ARRAY(String))
+    books_count = Column(Integer, default=0)
+    reviews_count = Column(Integer, default=0)
+    likes_count = Column(Integer, default=0)
+    status = Column(String, nullable=False, default='ACTIVE')
 
-    user_profile = relationship("UserProfile", back_populates="author_profile")
     books = relationship("Book", back_populates="author")
 
 class Book(Base):
@@ -23,12 +26,14 @@ class Book(Base):
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     author_id = Column(UUID, ForeignKey('author_profiles.id'), nullable=False)
     title = Column(String, nullable=False)
+    description = Column(String)
     file_path = Column(String)
     genres = Column(ARRAY(String))
-    issued_date = Column(Date)
-    status = Column(String, nullable=False, default='ON MODERATE')
+    added_date = Column(Date)
+    status = Column(String, nullable=False, default='ON_MODERATE')
+    total_rating = Column(Float, default=0.0)
+    likes_count = Column(Integer, default=0)
+    pages_count = Column(Integer, default=0)
+    reviews_count = Column(Integer, default=0)
 
     author = relationship("AuthorProfile", back_populates="books")
-    reviews = relationship("Review", back_populates="book")
-    likers = relationship("UserProfile", secondary="book_likes", back_populates="liked_books")
-    book_statuses = relationship("UserBookStatus", back_populates="book")

@@ -7,9 +7,9 @@ import os
 
 
 def setup_logging(
-        logs_level: int,
-        logs_filename: str,
-        logs_format: str
+    logs_level: int,
+    logs_filename: str,
+    logs_format: str
 ) -> None:
     uvicorn_logger = logging.getLogger("uvicorn")
     uvicorn_logger.handlers.clear()
