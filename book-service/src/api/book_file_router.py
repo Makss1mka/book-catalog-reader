@@ -22,10 +22,10 @@ book_file_router = APIRouter(prefix="/books", tags=["Book Files"])
 async def get_book_pages(
     request: Request,
     book_id: str,
-    start_page: int = Query(..., ge=1),
-    end_page: int = Query(..., ge=1),
     db: DatabaseSession,
-    user_context: UserContext
+    user_context: UserContext,
+    start_page: int = Query(..., ge=1),
+    end_page: int = Query(..., ge=1)
 ):
     book_file_service = BookFileService(db)
     return await book_file_service.get_book_pages(book_id, start_page, end_page, user_context)

@@ -18,6 +18,28 @@ services:
     networks:
       - backend
 
+  book-service:
+    build:
+      context: ./book-service
+      args:
+        APP_PORT: 
+    container_name: "book-service"
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_HOST: "book-service"
+      APP_PORT: 8082
+      DB_URL: ${BOOK_SERVICE_DB_URL}
+      DB_USER: ${BOOK_SERVICE_DB_USERNAME}
+      DB_PASSWORD: ${BOOK_SERVICE_DB_PASSWORD}
+      DB_NAME: ${BOOK_SERVICE_DB_NAME}
+      DB_HOST: ${BOOK_SERVICE_DB_HOST}
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge

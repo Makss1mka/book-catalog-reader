@@ -27,9 +27,7 @@ import uvicorn
 import logging
 
 @asynccontextmanager
-async def app_lifespan(
-    app: FastAPI
-) -> AsyncIterator[None]:
+async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
     setup_logging(
         logs_filename=LOGS_FILENAME,
         logs_format=LOGS_FORMAT,

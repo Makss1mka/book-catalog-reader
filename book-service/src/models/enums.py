@@ -1,9 +1,9 @@
 from enum import Enum
 
 class UserRole(str, Enum):
-    GUEST = "Guest"
-    USER = "User"
-    ADMIN = "Admin"
+    GUEST = "GUEST"
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 class UserStatus(str, Enum):
     BLOCKED = "BLOCKED"

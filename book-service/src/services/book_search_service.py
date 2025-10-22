@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, func, and_, or_, desc, asc, ilike
+from sqlalchemy import select, func, and_, or_, desc, asc, literal
 from typing import Optional, List, Dict, Any
 import logging
 from datetime import date
@@ -94,14 +94,8 @@ class BookSearchService:
             key = search_params['key'].strip()
             if key:
                 conditions.append(or_(
-                    ilike(
-                        f" {Book.title} ",
-                        f"% {key}%"
-                    ),
-                    ilike(
-                        f" {AuthorProfile.name} ",
-                        f"% {key}%"
-                    )
+                    literal(f" {Book.title.lower()} ").like(f"% {key.lower()}%"),
+                    literal(f" {AuthorProfile.name.lower()} ").like(f"% {key.lower()}%")
                 ))
         
         if conditions:

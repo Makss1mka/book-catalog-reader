@@ -11,7 +11,7 @@ from src.middlewares.access_control import require_access
 
 logger = logging.getLogger(__name__)
 
-status_router = APIRouter(prefix="/", tags=["Status Management"])
+status_router = APIRouter(tags=["Status Management"])
 
 
 @status_router.put("/books/{book_id}/status", response_model=StatusUpdateResponseDTO)
