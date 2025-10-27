@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import logging
+import uuid
 
 from src.annotations import DatabaseSession, UserContext
 from src.models.crud_request_dtos import AuthorProfileCreateDTO, AuthorProfileUpdateDTO
@@ -51,7 +52,7 @@ async def get_all_author_profiles(
 )
 async def get_author_profile(
     request: Request,
-    author_id: str,
+    author_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
 ):
@@ -66,7 +67,7 @@ async def get_author_profile(
 )
 async def update_author_profile(
     request: Request,
-    author_id: str,
+    author_id: uuid.UUID,
     author_data: AuthorProfileUpdateDTO,
     db: DatabaseSession,
     user_context: UserContext
@@ -82,7 +83,7 @@ async def update_author_profile(
 )
 async def delete_author_profile(
     request: Request,
-    author_id: str,
+    author_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
 ):

@@ -20,6 +20,6 @@ async def pydantic_validation_exception_handler(req: Request, ex: RequestValidat
     logger.exception(f"VALIDATION EXCEPTION: {ex.errors} | {ex.__traceback__}")
 
     return JSONResponse(
-        status_code=404,
+        status_code=400,
         content={"error": "Validation failed"},
     )

@@ -21,11 +21,11 @@ class StatusService:
     
     async def update_book_status(
         self,
-        book_id: str,
+        book_id: uuid.UUID,
         status_data: BookStatusUpdateDTO,
         user_context: UserContext
     ) -> StatusUpdateResponseDTO:
-        query = select(Book).where(Book.id == uuid.UUID(book_id))
+        query = select(Book).where(Book.id == book_id)
         result = await self.db_session.execute(query)
         book = result.scalar_one_or_none()
         
@@ -43,7 +43,7 @@ class StatusService:
         
         await self.db_session.execute(
             update(Book)
-            .where(Book.id == uuid.UUID(book_id))
+            .where(Book.id == book_id)
             .values(status=new_status)
         )
         await self.db_session.commit()
@@ -57,11 +57,11 @@ class StatusService:
     
     async def update_author_profile_status(
         self,
-        author_id: str,
+        author_id: uuid.UUID,
         status_data: AuthorProfileStatusUpdateDTO,
         user_context: UserContext
     ) -> StatusUpdateResponseDTO:
-        query = select(AuthorProfile).where(AuthorProfile.id == uuid.UUID(author_id))
+        query = select(AuthorProfile).where(AuthorProfile.id == author_id)
         result = await self.db_session.execute(query)
         author_profile = result.scalar_one_or_none()
         
@@ -79,7 +79,7 @@ class StatusService:
         
         await self.db_session.execute(
             update(AuthorProfile)
-            .where(AuthorProfile.id == uuid.UUID(author_id))
+            .where(AuthorProfile.id == author_id)
             .values(status=new_status)
         )
         await self.db_session.commit()

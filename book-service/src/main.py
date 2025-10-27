@@ -11,7 +11,7 @@ from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
     code_exception_handler,
 )
-from src.middlewares.auth_middleware import extract_user_context
+from src.middlewares.auth_middleware import UserContextMiddleware
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
@@ -25,6 +25,7 @@ from fastapi import FastAPI, Request
 
 import uvicorn
 import logging
+
 
 @asynccontextmanager
 async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -60,12 +61,7 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(lifespan=app_lifespan)
 
-@app.middleware("http")
-async def user_context_middleware(request: Request, call_next):
-    user_context = await extract_user_context(request)
-    request.state.user_context = user_context
-    response = await call_next(request)
-    return response
+app.add_middleware(UserContextMiddleware)
 
 app.include_router(book_crud_router)
 app.include_router(author_crud_router)

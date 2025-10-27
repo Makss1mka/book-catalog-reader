@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
@@ -21,7 +22,7 @@ status_router = APIRouter(tags=["Status Management"])
 )
 async def update_book_status(
     request: Request,
-    book_id: str,
+    book_id: uuid.UUID,
     status_data: BookStatusUpdateDTO,
     db: DatabaseSession,
     user_context: UserContext
@@ -37,7 +38,7 @@ async def update_book_status(
 )
 async def update_author_profile_status(
     request: Request,
-    author_id: str,
+    author_id: uuid.UUID,
     status_data: AuthorProfileStatusUpdateDTO,
     db: DatabaseSession,
     user_context: UserContext

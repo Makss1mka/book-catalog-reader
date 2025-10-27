@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Request, UploadFile, File, Form, HTTPException
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 import logging
 
+from src.globals import MAX_FILE_SIZE
 from src.annotations import DatabaseSession, UserContext
 from src.models.crud_request_dtos import BookCreateDTO, BookUpdateDTO
 from src.models.response_dtos import BookResponseDTO
@@ -25,24 +27,10 @@ async def create_book(
     request: Request,
     db: DatabaseSession,
     user_context: UserContext,
-    title: str = Form(...),
-    description: Optional[str] = Form("No description"),
-    genres: Optional[list[str]] = Form(list()),
-    file: UploadFile = File(...)
+    book_data: BookCreateDTO
 ):
-    if file.content_type != "application/pdf":
-        raise BadRequestException("Only PDF files are allowed")
-    
-    file_content = await file.read()
-
-    book_data = BookCreateDTO(
-        title=title,
-        description=description,
-        genres=genres
-    )
-
     book_service = BookService(db)
-    return await book_service.create_book(book_data, user_context, file_content)
+    return await book_service.create_book(book_data, user_context)
 
 
 @book_crud_router.get("/{book_id}", response_model=BookResponseDTO)
@@ -52,7 +40,7 @@ async def create_book(
 )
 async def get_book(
     request: Request,
-    book_id: str,
+    book_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
 ):  
@@ -67,7 +55,7 @@ async def get_book(
 )
 async def update_book(
     request: Request,
-    book_id: str,
+    book_id: uuid.UUID,
     book_data: BookUpdateDTO,
     db: DatabaseSession,
     user_context: UserContext
@@ -83,7 +71,7 @@ async def update_book(
 )
 async def delete_book(
     request: Request,
-    book_id: str,
+    book_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
 ):
@@ -99,7 +87,7 @@ async def delete_book(
 )
 async def get_books_by_author(
     request: Request,
-    author_id: str,
+    author_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
 ):

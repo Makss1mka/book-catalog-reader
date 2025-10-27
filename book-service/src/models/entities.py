@@ -9,7 +9,7 @@ class AuthorProfile(Base):
     __tablename__ = 'author_profiles'
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
-    user_profile_id = Column(UUID, ForeignKey('user_profiles.id'), nullable=False)
+    user_profile_id = Column(UUID, nullable=False)
     name = Column(String, nullable=False)
     rating = Column(Float, default=0.0)
     common_genres = Column(ARRAY(String))
@@ -28,6 +28,7 @@ class Book(Base):
     title = Column(String, nullable=False)
     description = Column(String)
     file_path = Column(String)
+    cover_path = Column(String)
     genres = Column(ARRAY(String))
     added_date = Column(Date)
     status = Column(String, nullable=False, default='ON_MODERATE')

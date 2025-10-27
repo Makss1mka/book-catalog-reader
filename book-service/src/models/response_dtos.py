@@ -1,9 +1,11 @@
+import logging
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import date
 from src.models.enums import BookStatus, AuthorProfileStatus
 from src.models.entities import Book, AuthorProfile
 
+logger = logging.getLogger(__name__)
 
 class AuthorProfileResponseDTO(BaseModel):
     id: str
@@ -37,8 +39,9 @@ class BookResponseDTO(BaseModel):
     title: str
     description: Optional[str]
     file_path: Optional[str]
+    cover_path: Optional[str]
     genres: List[str]
-    issued_date: Optional[date]
+    added_date: Optional[date]
     status: str
     total_rating: float
     likes_count: int
@@ -54,8 +57,9 @@ class BookResponseDTO(BaseModel):
             title=entity.title,
             description=entity.description,
             file_path=entity.file_path,
+            cover_path=entity.cover_path,
             genres=entity.genres or [],
-            issued_date=entity.issued_date,
+            added_date=entity.added_date,
             status=entity.status,
             total_rating=entity.total_rating,
             likes_count=entity.likes_count,
@@ -93,7 +97,7 @@ class BookPageResponseDTO(BaseModel):
     book_id: str
     page_number: int
     total_pages: int
-    content: str  # Base64 encoded content
+    content: str
 
 
 class StatusUpdateResponseDTO(BaseModel):

@@ -5,6 +5,8 @@
 .idea
 */.idea
 pg_data
+books_files
+covers_files
 
 # MIGRATIONS
 */alembic.ini

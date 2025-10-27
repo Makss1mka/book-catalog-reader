@@ -8,7 +8,7 @@ load_dotenv()
 # App start params
 #
 APP_HOST: str = os.environ.get("APP_HOST")
-APP_PORT: str | int = os.environ.get("APP_PORT")
+APP_PORT: int = int(os.environ.get("APP_PORT"))
 
 #
 # Database credits
@@ -41,6 +41,8 @@ STATUS_ROUTER_PREFIX: str = "/status"
 MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
 ALLOWED_FILE_TYPES: list = ["application/pdf"]
 UPLOAD_DIR: str = "uploads/books"
+BOOK_FILES_PATH_DIRECTORY: str = "./books_files/"
+BOOK_COVERS_PATH_DIRECTORY: str = "./covers_files/"
 
 #
 # Pagination configs
@@ -59,4 +61,3 @@ MAX_SEARCH_RESULTS: int = 1000
 # Other file vars
 #
 MAX_PAGES_PER_REQUEST: int = 10
-BOOK_FILES_PATH_DIRECTORY: str = "./books_files/"

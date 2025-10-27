@@ -5,13 +5,12 @@ from src.models.enums import UserRole, BookStatus, AuthorProfileStatus
 from src.middlewares.auth_middleware import get_user_context
 from src.exceptions.code_exceptions import ForbiddenException, NotFoundException
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
 
-class AccessControl:
-    """Класс для управления доступом к ресурсам"""
-    
+class AccessControl:   
     def __init__(
         self,
         allowed_roles: List[UserRole] = None,
@@ -57,7 +56,7 @@ def require_access(
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request = None
-            for arg in args:
+            for arg in kwargs.values():
                 if isinstance(arg, Request):
                     request = arg
                     break
@@ -89,10 +88,10 @@ def require_access(
 def check_resource_access(
     user_context,
     resource_status: str,
-    resource_owner_id: str = None,
+    resource_owner_id: uuid.UUID = None,
     allowed_statuses: List[str] = list()
 ) -> bool: 
-    if allowed_statuses.empty():
+    if len(allowed_statuses) == 0:
         allowed_statuses.append("ACTIVE")
     
     if user_context.is_admin:

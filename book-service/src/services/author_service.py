@@ -10,7 +10,7 @@ from src.models.entities import AuthorProfile, Book
 from src.models.crud_request_dtos import AuthorProfileCreateDTO, AuthorProfileUpdateDTO
 from src.models.response_dtos import AuthorProfileResponseDTO
 from src.models.enums import AuthorProfileStatus
-from src.exceptions.code_exceptions import NotFoundException, ConflictException, BadRequestException
+from src.exceptions.code_exceptions import ForbiddenException, NotFoundException, ConflictException, BadRequestException
 from src.middlewares.access_control import check_resource_access, get_resource_access_response
 from src.middlewares.auth_middleware import UserContext
 
@@ -24,10 +24,10 @@ class AuthorProfileService:
     async def create_author_profile(
         self, 
         author_data: AuthorProfileCreateDTO, 
-        user_profile_id: str
+        user_profile_id: uuid.UUID
     ) -> AuthorProfileResponseDTO:
         existing_query = select(AuthorProfile).where(
-            AuthorProfile.user_profile_id == uuid.UUID(user_profile_id)
+            AuthorProfile.user_profile_id == user_profile_id
         )
         existing_result = await self.db_session.execute(existing_query)
         existing_profile = existing_result.scalar_one_or_none()
@@ -36,25 +36,30 @@ class AuthorProfileService:
             raise ConflictException("Author profile already exists for this user")
         
         author_profile = AuthorProfile(
-            user_profile_id=uuid.UUID(user_profile_id),
+            id=user_profile_id,
+            user_profile_id=user_profile_id,
             name=author_data.name,
             common_genres=author_data.common_genres,
             status=AuthorProfileStatus.ACTIVE.value
         )
         
-        self.db_session.add(author_profile)
-        await self.db_session.commit()
-        await self.db_session.refresh(author_profile)
-        
+        try:
+            self.db_session.add(author_profile)
+            await self.db_session.commit()
+            await self.db_session.refresh(author_profile)
+        except Exception as e:
+            logger.exception(e)
+            raise ConflictException("Occures some conflicts while creating new author profile")
+
         return AuthorProfileResponseDTO.from_entity(author_profile)
     
     async def get_author_profile_by_id(
         self, 
-        author_id: str, 
+        author_id: uuid.UUID, 
         user_context: UserContext,
         include_books: bool = True
     ) -> AuthorProfileResponseDTO:
-        query = select(AuthorProfile).where(AuthorProfile.id == uuid.UUID(author_id))
+        query = select(AuthorProfile).where(AuthorProfile.id == author_id)
         
         if include_books:
             query = query.options(selectinload(AuthorProfile.books))
@@ -68,7 +73,7 @@ class AuthorProfileService:
         if not check_resource_access(
             user_context, 
             author_profile.status, 
-            str(author_profile.user_profile_id)
+            author_profile.user_profile_id
         ):
             raise HTTPException(status_code=403, detail=get_resource_access_response(author_profile.status))
         
@@ -76,32 +81,32 @@ class AuthorProfileService:
     
     async def update_author_profile(
         self, 
-        author_id: str, 
+        author_id: uuid.UUID, 
         author_data: AuthorProfileUpdateDTO,
         user_context: UserContext
     ) -> AuthorProfileResponseDTO:
-        query = select(AuthorProfile).where(AuthorProfile.id == uuid.UUID(author_id))
+        query = select(AuthorProfile).where(AuthorProfile.id == author_id)
         result = await self.db_session.execute(query)
         author_profile = result.scalar_one_or_none()
         
         if not author_profile:
             raise NotFoundException("Author profile not found")
         
+        logger.info(f"{user_context.user_id} {user_context.user_name} {user_context.user_role} {user_context.user_status}")
+        logger.info(f"{author_profile.id}")
         if not self._can_modify_author_profile(user_context, author_profile):
-            raise ConflictException("You don't have permission to modify this author profile")
+            raise ForbiddenException("You don't have permission to modify this author profile")
         
         update_data = {}
         if author_data.name is not None:
             update_data['name'] = author_data.name
         if author_data.common_genres is not None:
             update_data['common_genres'] = author_data.common_genres
-        if author_data.status is not None:
-            update_data['status'] = author_data.status.value
         
         if update_data:
             await self.db_session.execute(
                 update(AuthorProfile)
-                .where(AuthorProfile.id == uuid.UUID(author_id))
+                .where(AuthorProfile.id == author_id)
                 .values(**update_data)
             )
             await self.db_session.commit()
@@ -111,10 +116,10 @@ class AuthorProfileService:
     
     async def delete_author_profile(
         self, 
-        author_id: str, 
+        author_id: uuid.UUID, 
         user_context: UserContext
     ) -> None:
-        query = select(AuthorProfile).where(AuthorProfile.id == uuid.UUID(author_id))
+        query = select(AuthorProfile).where(AuthorProfile.id == author_id)
         result = await self.db_session.execute(query)
         author_profile = result.scalar_one_or_none()
         
@@ -124,7 +129,7 @@ class AuthorProfileService:
         if not self._can_modify_author_profile(user_context, author_profile):
             raise ConflictException("You don't have permission to delete this author profile")
         
-        books_query = select(Book).where(Book.author_id == uuid.UUID(author_id))
+        books_query = select(Book).where(Book.author_id == author_id)
         books_result = await self.db_session.execute(books_query)
         books = books_result.scalars().all()
         
@@ -132,7 +137,7 @@ class AuthorProfileService:
             raise ConflictException("Cannot delete author profile with existing books")
         
         await self.db_session.execute(
-            delete(AuthorProfile).where(AuthorProfile.id == uuid.UUID(author_id))
+            delete(AuthorProfile).where(AuthorProfile.id == author_id)
         )
         await self.db_session.commit()
     
@@ -154,7 +159,7 @@ class AuthorProfileService:
             if check_resource_access(
                 user_context, 
                 profile.status, 
-                str(profile.user_profile_id)
+                profile.user_profile_id
             ):
                 accessible_profiles.append(AuthorProfileResponseDTO.from_entity(profile))
         
@@ -162,11 +167,11 @@ class AuthorProfileService:
     
     async def _get_author_profile_by_user_id_internal(
         self, 
-        user_profile_id: str, 
+        user_profile_id: uuid.UUID, 
         include_books: bool = True
     ) -> AuthorProfileResponseDTO:
         query = select(AuthorProfile).where(
-            AuthorProfile.user_profile_id == uuid.UUID(user_profile_id)
+            AuthorProfile.user_profile_id == user_profile_id
         )
         
         if include_books:
@@ -180,8 +185,8 @@ class AuthorProfileService:
         
         return AuthorProfileResponseDTO.from_entity(author_profile)
     
-    async def update_author_statistics(self, author_id: str) -> None:
-        books_query = select(Book).where(Book.author_id == uuid.UUID(author_id))
+    async def update_author_statistics(self, author_id: uuid.UUID) -> None:
+        books_query = select(Book).where(Book.author_id == author_id)
         books_result = await self.db_session.execute(books_query)
         books = books_result.scalars().all()
         
@@ -197,7 +202,7 @@ class AuthorProfileService:
         
         await self.db_session.execute(
             update(AuthorProfile)
-            .where(AuthorProfile.id == uuid.UUID(author_id))
+            .where(AuthorProfile.id == author_id)
             .values(
                 rating=average_rating,
                 books_count=books_count,
@@ -215,7 +220,7 @@ class AuthorProfileService:
         if user_context.is_admin:
             return True
         
-        if user_context.user_id == str(author_profile.user_profile_id):
+        if user_context.user_id == author_profile.user_profile_id:
             return True
         
         return False

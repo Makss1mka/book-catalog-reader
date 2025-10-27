@@ -10,6 +10,7 @@ class UserStatus(str, Enum):
     ACTIVE = "ACTIVE"
 
 class BookStatus(str, Enum):
+    WAIT_FILE = "WAIT_FILE"
     ON_MODERATE = "ON_MODERATE"
     ACTIVE = "ACTIVE"
     PRIVATE = "PRIVATE"

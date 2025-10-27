@@ -124,7 +124,7 @@ class BookSearchService:
             if check_resource_access(
                 user_context, 
                 book.status, 
-                str(book.author_id)
+                book.author_id
             ):
                 accessible_books.append(BookResponseDTO.from_entity(book, include_author=True))
     
