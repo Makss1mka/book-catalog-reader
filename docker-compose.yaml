@@ -40,6 +40,7 @@ services:
       DB_PASSWORD: ${BOOK_SERVICE_DB_PASSWORD}
       DB_NAME: ${BOOK_SERVICE_DB_NAME}
       DB_HOST: ${BOOK_SERVICE_DB_HOST}
+      DB_ECHO_MODE: ${BOOK_SERVICE_DB_ECHO_MODE}
     networks:
       - backend
 

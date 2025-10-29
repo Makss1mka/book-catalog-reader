@@ -5,7 +5,7 @@ from src.models.enums import BookStatus, AuthorProfileStatus
 
 
 class BookCreateDTO(BaseModel):
-    title: str = Field(..., min_length=1, max_length=255)
+    title: str = Field(..., min_length=1, max_length=50)
     description: Optional[str] = Field(None, max_length=2000)
     genres: Optional[List[str]] = Field(default=[])
     
@@ -19,7 +19,7 @@ class BookCreateDTO(BaseModel):
 
 
 class BookUpdateDTO(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    title: Optional[str] = Field(None, min_length=1, max_length=50)
     description: Optional[str] = Field(None, max_length=2000)
     genres: Optional[List[str]] = Field(None)
     

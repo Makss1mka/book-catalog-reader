@@ -49,7 +49,7 @@ class StatusService:
         await self.db_session.commit()
         
         return StatusUpdateResponseDTO(
-            id=book_id,
+            id=str(book_id),
             old_status=old_status,
             new_status=new_status,
             message=f"Book status changed from {old_status} to {new_status}"
@@ -85,7 +85,7 @@ class StatusService:
         await self.db_session.commit()
         
         return StatusUpdateResponseDTO(
-            id=author_id,
+            id=str(author_id),
             old_status=old_status,
             new_status=new_status,
             message=f"Author profile status changed from {old_status} to {new_status}"

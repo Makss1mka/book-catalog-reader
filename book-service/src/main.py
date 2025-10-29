@@ -15,7 +15,7 @@ from src.middlewares.auth_middleware import UserContextMiddleware
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
-    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME,
+    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME, DB_ECHO_MODE
 )
 
 from fastapi.exceptions import RequestValidationError
@@ -44,7 +44,10 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
         db_host=DB_HOST,
         db_name=DB_NAME
     )
-    pool_config = PoolConfig()
+    pool_config = PoolConfig(
+        echo=DB_ECHO_MODE,
+        hide_parameters=not DB_ECHO_MODE
+    )
     connection_config = ConnectionConfig()
 
     await init_engine(
@@ -63,11 +66,11 @@ app = FastAPI(lifespan=app_lifespan)
 
 app.add_middleware(UserContextMiddleware)
 
+app.include_router(status_router)
+app.include_router(book_search_router)
 app.include_router(book_crud_router)
 app.include_router(author_crud_router)
-app.include_router(book_search_router)
 app.include_router(book_file_router)
-app.include_router(status_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)

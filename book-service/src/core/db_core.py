@@ -1,4 +1,5 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
+from src.globals import DB_ECHO_MODE
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -43,7 +44,7 @@ async def init_engine(
         pool_pre_ping=pool_config.pool_pre_ping,
         echo=pool_config.echo,
         echo_pool=pool_config.echo_pool,
-        hide_parameters=pool_config.hide_parameters
+        hide_parameters=pool_config.hide_parameters,
     )
 
     app.state.db_session_maker = sessionmaker(

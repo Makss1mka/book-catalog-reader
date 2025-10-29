@@ -7,7 +7,7 @@ load_dotenv()
 #
 # App start params
 #
-APP_HOST: str = os.environ.get("APP_HOST")
+APP_HOST: str = os.environ.get("APP_HOST", )
 APP_PORT: int = int(os.environ.get("APP_PORT"))
 
 #
@@ -18,6 +18,7 @@ DB_PASSWORD: str = os.environ.get("DB_PASSWORD")
 DB_NAME: str = os.environ.get("DB_NAME")
 DB_HOST: str = os.environ.get("DB_HOST")
 DB_URL: str = os.environ.get("DB_URL")
+DB_ECHO_MODE: bool = bool(os.environ.get("DB_ECHO_MODE", "False"))
 
 #
 # Logging config

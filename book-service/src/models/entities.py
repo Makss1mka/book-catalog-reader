@@ -1,5 +1,6 @@
-from sqlalchemy import Column, UUID, String, Float, Integer, Date, ARRAY, ForeignKey, text
+from sqlalchemy import Column, UUID, String, Float, Integer, Date, ForeignKey, text
 from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.dialects.postgresql import ARRAY
 import uuid
 
 class Base(DeclarativeBase):

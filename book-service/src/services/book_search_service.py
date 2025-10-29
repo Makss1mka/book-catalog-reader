@@ -3,8 +3,6 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, and_, or_, desc, asc, literal
 from typing import Optional, List, Dict, Any
 import logging
-from datetime import date
-from fastapi import HTTPException
 
 from src.models.entities import Book, AuthorProfile
 from src.models.response_dtos import BookSearchResponseDTO, BookResponseDTO
@@ -71,14 +69,10 @@ class BookSearchService:
             conditions.append(AuthorProfile.books_count <= search_params['author_books_max'])
         
         if 'book_genres' in search_params and search_params['book_genres']:
-            genres = [genre.strip() for genre in search_params['book_genres']]
-            for genre in genres:
-                conditions.append(Book.genres.contains(genre))
+            conditions.append(Book.genres.contains(search_params['book_genres']))
         
         if 'author_genres' in search_params and search_params['author_genres']:
-            author_genres = [genre.strip() for genre in search_params['author_genres']]
-            for genre in author_genres:
-                conditions.append(AuthorProfile.common_genres.contains(genre))
+            conditions.append(AuthorProfile.common_genres.contains(search_params['author_genres']))
         
         if 'added_date_from' in search_params:
             conditions.append(Book.added_date >= search_params['added_date_from'])
@@ -94,8 +88,8 @@ class BookSearchService:
             key = search_params['key'].strip()
             if key:
                 conditions.append(or_(
-                    literal(f" {Book.title.lower()} ").like(f"% {key.lower()}%"),
-                    literal(f" {AuthorProfile.name.lower()} ").like(f"% {key.lower()}%")
+                    (literal(' ') + Book.title + literal(' ')).ilike(f"% {key}%"),
+                    (literal(' ') + AuthorProfile.name + literal(' ')).ilike(f"% {key}%")
                 ))
         
         if conditions:
