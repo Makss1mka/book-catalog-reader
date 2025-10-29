@@ -1,5 +1,6 @@
-from sqlalchemy import Column, UUID, String, Float, Integer, Date, ARRAY, ForeignKey, text
+from sqlalchemy import Column, UUID, DateTime, String, Float, Integer, Date, ARRAY, ForeignKey, text
 from sqlalchemy.orm import DeclarativeBase, relationship
+from datetime import datetime
 import uuid
 
 
@@ -11,7 +12,7 @@ class UserProfile(Base):
     __tablename__ = 'user_profiles'
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4, server_default=text('gen_random_uuid()'))
-    name = Column(String, nullable=False)
+    username = Column(String, nullable=False)
     profile_picture = Column(String)
 
     user = relationship("User", back_populates="profile", uselist=False)
@@ -25,11 +26,13 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4, server_default=text('gen_random_uuid()'))
-    login = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     profile_id = Column(UUID, ForeignKey('user_profiles.id'), nullable=False)
     status = Column(String, nullable=False, default='ACTIVE', server_default=text("'ACTIVE'"))
+    role = Column(String, nullable=False, default='USER', server_default=text("'USER'"))
+    created_at = Column(DateTime, nullable=False, default=datetime.now, server_default=text('NOW()'))
+    blocked_for = Column(DateTime, nullable=True)
 
     profile = relationship("UserProfile", back_populates="user")
 
