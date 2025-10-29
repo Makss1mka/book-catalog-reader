@@ -1,103 +1,44 @@
 import logging
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from datetime import date
-from src.models.enums import BookStatus, AuthorProfileStatus
-from src.models.entities import Book, AuthorProfile
+from pydantic import BaseModel
+from typing import Optional
+from src.models.entities import User, UserProfile
 
 logger = logging.getLogger(__name__)
 
-class AuthorProfileResponseDTO(BaseModel):
+
+class UserProfileResponseDTO(BaseModel):
     id: str
-    user_profile_id: str
-    name: str
-    rating: float
-    common_genres: List[str]
-    books_count: int
-    reviews_count: int
-    likes_count: int
-    status: str
+    username: str
+    profile_picture: str
     
     @classmethod
-    def from_entity(cls, entity: AuthorProfile) -> 'AuthorProfileResponseDTO':
+    def from_entity(cls, entity: UserProfile) -> 'UserProfileResponseDTO':
         return cls(
             id=str(entity.id),
-            user_profile_id=str(entity.user_profile_id),
-            name=entity.name,
-            rating=entity.rating,
-            common_genres=entity.common_genres or [],
-            books_count=entity.books_count,
-            reviews_count=entity.reviews_count,
-            likes_count=entity.likes_count,
-            status=entity.status if hasattr(entity, 'status') else AuthorProfileStatus.ACTIVE.value
+            username=entity.username,
+            profile_picture=entity.profile_picture
         )
 
 
-class BookResponseDTO(BaseModel):
+class UserResponseDTO(BaseModel):
     id: str
-    author_id: str
     title: str
-    description: Optional[str]
-    file_path: Optional[str]
-    cover_path: Optional[str]
-    genres: List[str]
-    added_date: Optional[date]
+    email: str
     status: str
-    total_rating: float
-    likes_count: int
-    pages_count: int
-    reviews_count: int
-    author: Optional[AuthorProfileResponseDTO] = None
+    created_at: str
+    profile_id: str
+    user_profile: Optional[UserProfileResponseDTO]
     
     @classmethod
-    def from_entity(cls, entity: Book, include_author: bool = False) -> 'BookResponseDTO':
+    def from_entity(cls, entity: User, include_profile: bool = False) -> 'UserResponseDTO':
         return cls(
             id=str(entity.id),
-            author_id=str(entity.author_id),
-            title=entity.title,
-            description=entity.description,
-            file_path=entity.file_path,
-            cover_path=entity.cover_path,
-            genres=entity.genres or [],
-            added_date=entity.added_date,
+            email=entity.email,
             status=entity.status,
-            total_rating=entity.total_rating,
-            likes_count=entity.likes_count,
-            pages_count=entity.pages_count,
-            reviews_count=entity.reviews_count,
-            author=AuthorProfileResponseDTO.from_entity(entity.author) if include_author and entity.author else None
+            created_at=str(entity.created_at),
+            profile_id=str(entity.profile_id),
+            user_profile=UserProfileResponseDTO.from_entity(entity.profile) if include_profile and entity.profile else None
         )
-
-
-class BookSearchResponseDTO(BaseModel):
-    books: List[BookResponseDTO]
-    total_count: int
-    page_number: int
-    page_size: int
-    total_pages: int
-
-
-class AuthorProfileSearchResponseDTO(BaseModel):
-    authors: List[AuthorProfileResponseDTO]
-    total_count: int
-    page_number: int
-    page_size: int
-    total_pages: int
-
-
-class BookPagesResponseDTO(BaseModel):
-    book_id: str
-    start_page: int
-    end_page: int
-    total_pages: int
-    content: str  # Base64 encoded content
-
-
-class BookPageResponseDTO(BaseModel):
-    book_id: str
-    page_number: int
-    total_pages: int
-    content: str
 
 
 class StatusUpdateResponseDTO(BaseModel):

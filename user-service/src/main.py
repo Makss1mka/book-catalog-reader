@@ -1,9 +1,4 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
-from src.api.book_crud_router import book_crud_router
-from src.api.author_crud_router import author_crud_router
-from src.api.book_search_router import book_search_router
-from src.api.book_file_router import book_file_router
-from src.api.status_router import status_router
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
 from src.exceptions.code_exceptions import CodeException
@@ -66,11 +61,7 @@ app = FastAPI(lifespan=app_lifespan)
 
 app.add_middleware(UserContextMiddleware)
 
-app.include_router(status_router)
-app.include_router(book_search_router)
-app.include_router(book_crud_router)
-app.include_router(author_crud_router)
-app.include_router(book_file_router)
+# app.include_router()
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)

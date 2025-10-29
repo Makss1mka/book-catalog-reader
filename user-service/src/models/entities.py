@@ -1,41 +1,30 @@
-from sqlalchemy import Column, UUID, String, Float, Integer, Date, ForeignKey, text
+from sqlalchemy import Column, UUID, DateTime, String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, relationship
-from sqlalchemy.dialects.postgresql import ARRAY
+from datetime import datetime
 import uuid
 
 class Base(DeclarativeBase):
     pass
 
-class AuthorProfile(Base):
-    __tablename__ = 'author_profiles'
+class UserProfile(Base):
+    __tablename__ = 'user_profiles'
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
-    user_profile_id = Column(UUID, nullable=False)
-    name = Column(String, nullable=False)
-    rating = Column(Float, default=0.0)
-    common_genres = Column(ARRAY(String))
-    books_count = Column(Integer, default=0)
-    reviews_count = Column(Integer, default=0)
-    likes_count = Column(Integer, default=0)
+    username = Column(String, nullable=False)
+    profile_picture = Column(String)
+
+    user = relationship("User", back_populates="profile", uselist=False)
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(UUID, primary_key=True, default=uuid.uuid4)
+    password = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    profile_id = Column(UUID, ForeignKey('user_profiles.id'), nullable=False)
     status = Column(String, nullable=False, default='ACTIVE')
+    role = Column(String, nullable=False, default='USER')
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+    blocked_for = Column(DateTime, nullable=True)
 
-    books = relationship("Book", back_populates="author")
-
-class Book(Base):
-    __tablename__ = 'books'
-
-    id = Column(UUID, primary_key=True, default=uuid.uuid4)
-    author_id = Column(UUID, ForeignKey('author_profiles.id'), nullable=False)
-    title = Column(String, nullable=False)
-    description = Column(String)
-    file_path = Column(String)
-    cover_path = Column(String)
-    genres = Column(ARRAY(String))
-    added_date = Column(Date)
-    status = Column(String, nullable=False, default='ON_MODERATE')
-    total_rating = Column(Float, default=0.0)
-    likes_count = Column(Integer, default=0)
-    pages_count = Column(Integer, default=0)
-    reviews_count = Column(Integer, default=0)
-
-    author = relationship("AuthorProfile", back_populates="books")
+    profile = relationship("UserProfile", back_populates="user")

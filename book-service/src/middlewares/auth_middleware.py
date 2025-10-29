@@ -91,8 +91,5 @@ class UserContextMiddleware(BaseHTTPMiddleware):
 
         request.state.user_context = user_context
 
-        logger = logging.getLogger(__name__)
-        logger.debug(f"Parsed user context: {user_context.user_id} {user_context.user_name} {user_context.user_role} {user_context.user_status}")
-
         response = await call_next(request)
         return response
