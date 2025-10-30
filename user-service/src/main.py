@@ -1,4 +1,5 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
+from src.core.redis_core import redis_client_init
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
 from src.exceptions.code_exceptions import CodeException
@@ -10,7 +11,8 @@ from src.middlewares.auth_middleware import UserContextMiddleware
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
-    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME, DB_ECHO_MODE
+    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME, DB_ECHO_MODE,
+    REDIS_PORT, REDIS_HOST
 )
 
 from fastapi.exceptions import RequestValidationError
@@ -50,6 +52,12 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
         db_config=database_config,
         pool_config=pool_config,
         connection_config=connection_config
+    )
+
+    await redis_client_init(
+        app=app,
+        redis_host=REDIS_HOST,
+        redis_port=REDIS_PORT
     )
 
     logger.info(f"Server is started on {APP_HOST}:{APP_PORT}")

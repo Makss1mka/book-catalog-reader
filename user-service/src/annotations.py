@@ -1,9 +1,11 @@
-from src.core.db_core import get_db_session
 from src.middlewares.auth_middleware import extract_user_context
+from src.core.redis_core import get_redis_client
+from src.core.db_core import get_db_session
 
+from fastapi import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from redis.asyncio import Redis
 from typing import Annotated
-from fastapi import Depends, FastAPI, Query, Request
 
 DatabaseSession = Annotated[
     AsyncSession,
@@ -13,6 +15,11 @@ DatabaseSession = Annotated[
 UserContext = Annotated[
     object,
     Depends(extract_user_context)
+]
+
+Redis = Annotated[
+    Redis,
+    get_redis_client
 ]
 
 
