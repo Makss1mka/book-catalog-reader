@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
-import logging
-import uuid
-
-from src.annotations import DatabaseSession, UserContext
 from src.models.crud_request_dtos import AuthorProfileCreateDTO, AuthorProfileUpdateDTO
+from src.annotations import DatabaseSession, UserContext
 from src.models.response_dtos import AuthorProfileResponseDTO
 from src.models.enums import UserRole
 from src.services.author_service import AuthorProfileService
 from src.middlewares.access_control import require_access
+
+from fastapi import APIRouter, Request
+from typing import List
+import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -89,4 +88,5 @@ async def delete_author_profile(
 ):
     author_service = AuthorProfileService(db)
     await author_service.delete_author_profile(author_id, user_context)
-    return {"message": "Author profile deleted successfully"}
+    
+    return "Author profile deleted successfully"

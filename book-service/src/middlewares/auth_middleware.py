@@ -36,7 +36,7 @@ class UserContext:
     def is_active(self) -> bool:
         return self.user_status == UserStatus.ACTIVE
 
-
+    
 async def extract_user_context(request: Request) -> UserContext:
     user_id_str = request.headers.get("X-User-Id")
     user_name_str = request.headers.get("X-User-Name")
