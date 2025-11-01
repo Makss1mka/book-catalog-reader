@@ -13,8 +13,12 @@ class UserProfile(Base):
     username = Column(String, nullable=False)
     profile_picture = Column(String)
 
-    user = relationship("User", back_populates="profile", uselist=False)
-
+    user = relationship(
+        "User",
+        back_populates="profile",
+        uselist=False
+    )
+    
 class User(Base):
     __tablename__ = 'users'
 
@@ -27,4 +31,10 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.now)
     blocked_for = Column(DateTime, nullable=True)
 
-    profile = relationship("UserProfile", back_populates="user")
+    profile = relationship(
+        "UserProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        single_parent=True
+    )

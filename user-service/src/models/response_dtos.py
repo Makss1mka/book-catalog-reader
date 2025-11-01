@@ -1,43 +1,39 @@
-import logging
+from src.models.entities import User, UserProfile
 from pydantic import BaseModel
 from typing import Optional
-from src.models.entities import User, UserProfile
-
-logger = logging.getLogger(__name__)
 
 
 class UserProfileResponseDTO(BaseModel):
     id: str
     username: str
-    profile_picture: str
+    profile_picture: Optional[str]
     
     @classmethod
     def from_entity(cls, entity: UserProfile) -> 'UserProfileResponseDTO':
         return cls(
             id=str(entity.id),
             username=entity.username,
-            profile_picture=entity.profile_picture
+            profile_picture=entity.profile_picture if entity.profile_picture else None 
         )
 
 
 class UserResponseDTO(BaseModel):
     id: str
-    title: str
+    username: str
     email: str
-    status: str
     created_at: str
     profile_id: str
-    user_profile: Optional[UserProfileResponseDTO]
+    profile_picture: Optional[str]
     
     @classmethod
-    def from_entity(cls, entity: User, include_profile: bool = False) -> 'UserResponseDTO':
+    def from_entity(cls, entity: User) -> 'UserResponseDTO':
         return cls(
             id=str(entity.id),
             email=entity.email,
-            status=entity.status,
             created_at=str(entity.created_at),
             profile_id=str(entity.profile_id),
-            user_profile=UserProfileResponseDTO.from_entity(entity.profile) if include_profile and entity.profile else None
+            username=entity.profile.username, 
+            profile_picture=entity.profile.profile_picture if entity.profile.profile_picture else None
         )
 
 

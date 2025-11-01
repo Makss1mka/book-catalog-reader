@@ -9,7 +9,7 @@ import logging
 logger: logging.Logger = logging.getLogger(__name__)
 
 async def code_exception_handler(req: Request, ex: CodeException):
-    logger.exception(f"CODE EXCEPTION: {ex.status_code} | {ex.message}")
+    logger.debug(f"CODE EXCEPTION: {ex.status_code} | {ex.message}")
 
     return JSONResponse(
         status_code=ex.status_code,
@@ -17,7 +17,7 @@ async def code_exception_handler(req: Request, ex: CodeException):
     )
 
 async def pydantic_validation_exception_handler(req: Request, ex: RequestValidationError):
-    logger.exception(f"VALIDATION EXCEPTION: {ex.errors} | {ex.__traceback__}")
+    logger.debug(f"VALIDATION EXCEPTION: {ex.errors} | {ex.__traceback__}")
 
     return JSONResponse(
         status_code=400,

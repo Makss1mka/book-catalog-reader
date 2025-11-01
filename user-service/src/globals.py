@@ -18,7 +18,7 @@ DB_PASSWORD: str = os.environ.get("DB_PASSWORD")
 DB_NAME: str = os.environ.get("DB_NAME")
 DB_HOST: str = os.environ.get("DB_HOST")
 DB_URL: str = os.environ.get("DB_URL")
-DB_ECHO_MODE: bool = bool(os.environ.get("DB_ECHO_MODE", "False"))
+DB_ECHO_MODE: bool = False
 
 #
 # Logging config
@@ -57,3 +57,10 @@ MAX_PAGES_PER_REQUEST: int = 10
 #
 TOKEN_SECRET: str = os.environ.get("TOKEN_SECRET")
 TOKEN_TTL: int = 30 * 60 * 60
+
+#
+# Redis configs
+#
+REDIS_HOST: str = os.environ.get("REDIS_HOST")
+REDIS_PORT: int = os.environ.get("REDIS_PORT")
+REDIS_SESSION_TTL: int = 10 * 60

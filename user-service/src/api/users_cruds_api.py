@@ -1,23 +1,23 @@
-from src.models.entities import User
-from src.models.response_dtos import UserResponseDTO, UserProfileResponseDTO
+from src.models.response_dtos import UserResponseDTO
 from src.models.request_dtos import UserUpdateDTO
-from src.models.enums import UserRole, UserStatus
+from src.models.enums import UserRole
 from src.middlewares.access_control import require_access
-from src.middlewares.auth_middleware import UserContext
+from src.annotations import UserContext
 from src.services.user_service import UserService
 from src.annotations import DatabaseSession
 
-from fastapi import APIRouter, Request, Response, Path
-from uuid import UUID
+from fastapi import APIRouter, Request
+import uuid
+
 
 import logging
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-users_crud_router = APIRouter(prefix="/users", tags=["User CREDS"])
+user_crud_router = APIRouter(prefix="/users", tags=["User CREDS"])
 
 
-@users_crud_router.get("/{user_id}/profile")
+@user_crud_router.get("/{user_id}", response_model=UserResponseDTO)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True,
@@ -25,15 +25,15 @@ users_crud_router = APIRouter(prefix="/users", tags=["User CREDS"])
 )
 async def get_user_by_id(
     request: Request,
-    user_id: UUID,
+    user_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
-) -> UserProfileResponseDTO:
+):
     user_service = UserService(db, user_context)
     return await user_service.get_user_by_id(user_id)
 
 
-@users_crud_router.put("/{user_id}")
+@user_crud_router.put("/{user_id}", response_model=UserResponseDTO)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True,
@@ -41,16 +41,16 @@ async def get_user_by_id(
 )
 async def update_user(
     request: Request,
-    user_id: UUID,
+    user_id: uuid.UUID,
     update_user_dto: UserUpdateDTO,
     db: DatabaseSession,
     user_context: UserContext
-) -> UserProfileResponseDTO:
+):
     user_service = UserService(db, user_context)
-    return await user_service.get_user_by_id(user_id, update_user_dto)
+    return await user_service.update_user(user_id, update_user_dto)
 
 
-@users_crud_router.delete("/{user_id}")
+@user_crud_router.delete("/{user_id}")
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True,
@@ -58,12 +58,12 @@ async def update_user(
 )
 async def delete_user(
     request: Request,
-    user_create_dto: UserCreateDTO,
+    user_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
-) -> dict:
+):
     user_service = UserService(db, user_context)
-    message = await user_service.get_user_by_id(user_id, update_user_dto)
+    message = await user_service.delete_user(user_id)
 
     return {
         "status": "OK",

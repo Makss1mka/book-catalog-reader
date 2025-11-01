@@ -17,9 +17,9 @@ UserContext = Annotated[
     Depends(extract_user_context)
 ]
 
-Redis = Annotated[
+RedisClient = Annotated[
     Redis,
-    get_redis_client
+    Depends(get_redis_client)
 ]
 
 

@@ -1,4 +1,17 @@
 services:
+  redis:
+    image: redis:7
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    networks:
+      - backend
+
   postgres:
     image: postgres:17
     container_name: "postgres"
@@ -32,6 +45,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       APP_HOST: "book-service"
       APP_PORT: 8082
@@ -40,9 +55,36 @@ services:
       DB_PASSWORD: ${BOOK_SERVICE_DB_PASSWORD}
       DB_NAME: ${BOOK_SERVICE_DB_NAME}
       DB_HOST: ${BOOK_SERVICE_DB_HOST}
-      DB_ECHO_MODE: ${BOOK_SERVICE_DB_ECHO_MODE}
     networks:
       - backend
+
+  user-service:
+    build:
+      context: ./user-service
+      args:
+        APP_PORT: 
+    container_name: "user-service"
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_HOST: "user-service"
+      APP_PORT: 8083
+      DB_URL: ${USER_SERVICE_DB_URL}
+      DB_USER: ${USER_SERVICE_DB_USERNAME}
+      DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
+      DB_NAME: ${USER_SERVICE_DB_NAME}
+      DB_HOST: ${USER_SERVICE_DB_HOST}
+      REDIS_HOST: ${USER_REDIS_HOST}
+      REDIS_PORT: ${USER_REDIS_PORT}
+      TOKEN_SECRET: ${USER_TOKEN_SECRET}
+    networks:
+      - backend
+
 
 networks:
   backend:

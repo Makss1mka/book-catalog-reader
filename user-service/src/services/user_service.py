@@ -1,22 +1,18 @@
-import email
-from src.models.enums import UserStatus
 from src.models.response_dtos import UserProfileResponseDTO, UserResponseDTO
 from src.models.request_dtos import UserUpdateDTO
 from src.middlewares.access_control import check_resource_access
 from src.middlewares.auth_middleware import UserContext
-from src.models.entities import User, UserProfile
+from src.models.entities import User
 from src.exceptions.code_exceptions import (
-    ForbiddenException, NoContentException, NotFoundException, BadRequestException, ConflictException,
+    ForbiddenException, NoContentException, NotFoundException, ConflictException,
 )
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, DBAPIError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import select, or_
-from passlib.hash import bcrypt
+from sqlalchemy import select
 from uuid import UUID
 
-import datetime
 import logging
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -81,5 +77,6 @@ class UserService:
         await self.db_session.delete(
             await self._get_user_entity_by_id(user_id)
         )
+        await self.db_session.commit()
 
         return "User was deleted"

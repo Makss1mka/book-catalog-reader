@@ -1,4 +1,6 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
+from src.api.users_cruds_api import user_crud_router
+from src.api.auth_api import auth_router
 from src.core.redis_core import redis_client_init
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
@@ -69,7 +71,8 @@ app = FastAPI(lifespan=app_lifespan)
 
 app.add_middleware(UserContextMiddleware)
 
-# app.include_router()
+app.include_router(auth_router)
+app.include_router(user_crud_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)

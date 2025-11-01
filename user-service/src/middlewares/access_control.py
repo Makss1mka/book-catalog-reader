@@ -1,7 +1,7 @@
 from functools import wraps
-from typing import List, Callable, Any
+from typing import List, Callable
 from fastapi import Request, HTTPException
-from src.models.enums import UserRole, BookStatus, AuthorProfileStatus
+from src.models.enums import UserRole
 from src.middlewares.auth_middleware import get_user_context
 from src.exceptions.code_exceptions import ForbiddenException, NotFoundException
 import logging

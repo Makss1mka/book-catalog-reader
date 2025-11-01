@@ -15,7 +15,7 @@ class UserAuthDTO(BaseModel):
 
 
 class UserUpdateDTO(BaseModel):
-    username: Optional[str] = Field(..., min_length=3, max_length=40)
+    username: Optional[str] = Field(default=None, min_length=3, max_length=40)
 
 
 class UserStatusUpdateDTO(BaseModel):

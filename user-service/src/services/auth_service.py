@@ -1,27 +1,30 @@
-import email
-from src.models.enums import UserStatus
+from src.models.enums import UserStatus, UserRole
 from src.models.response_dtos import UserResponseDTO
 from src.models.request_dtos import UserRegistrationDTO, UserAuthDTO
-from src.middlewares.access_control import check_resource_access
 from src.middlewares.auth_middleware import UserContext
 from src.models.entities import User, UserProfile
-from src.globals import TOKEN_SECRET, TOKEN_TTL
+from src.globals import TOKEN_SECRET, TOKEN_TTL, REDIS_SESSION_TTL
 from src.exceptions.code_exceptions import (
-    ForbiddenException, NoContentException, NotFoundException, BadRequestException, ConflictException, UnauthorizedException,
+    NotFoundException, ConflictException, UnauthorizedException,
 )
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, DBAPIError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import select, or_
-from passlib.hash import bcrypt
-from uuid import UUID
+from redis.asyncio import Redis
+from sqlalchemy import select
 
 import datetime
 import logging
+import bcrypt
+import uuid
+import json
 import jwt
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+TokenStr = str
+SessionIdStr = str
 
 
 class AuthService:
@@ -30,20 +33,16 @@ class AuthService:
         self.user_context = user_context
 
 
-    async def create_token(self, user: User) -> str:
-        expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=TOKEN_TTL)
+    def _create_token(self, user: User) -> str:
         payload = {
-            "sub": user.id,
-            "exp": expiration_time,
-            "iat": datetime.datetime.now(datetime.timezone.utc),
-            "username": user.profile.username,
-            "user_role": user.role,
-            "user_status": user.status
+            "sub": str(user.profile.id),
+            "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=TOKEN_TTL),
+            "iat": datetime.datetime.now(datetime.timezone.utc)
         }
         token = jwt.encode(payload, TOKEN_SECRET, algorithm="HS256")
         return token
 
-    async def decode_token(self, token: str) -> dict:
+    def _decode_token(self, token: str) -> dict:
         try:
             payload = jwt.decode(token, TOKEN_SECRET, algorithms=["HS256"])
             return payload
@@ -52,8 +51,22 @@ class AuthService:
         except jwt.InvalidTokenError:
             raise UnauthorizedException("Token is invalid")
 
+    async def _create_session(self, user: User, redis: Redis) -> str:
+        user_payload = {
+            "user-id": str(user.profile.id),
+            "user-name": user.profile.username,
+            "user-role": user.role,
+            "user-status": user.status
+        }
 
-    async def register_user(self, user_register_dto: UserRegistrationDTO) -> UserResponseDTO:
+        session_id = str(uuid.uuid4())
+
+        await redis.set(session_id, json.dumps(user_payload), REDIS_SESSION_TTL)
+
+        return session_id
+
+
+    async def register_user(self, user_register_dto: UserRegistrationDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
         user_query = select(User).where(User.email == user_register_dto.email).options(joinedload(User.profile))
         user_result = await self.db_session.execute(user_query)
         user = user_result.scalar_one_or_none()
@@ -62,25 +75,36 @@ class AuthService:
             raise ConflictException("User with such email has already exist.")
 
         try:
+            salt = bcrypt.gensalt(rounds=12)
+            hashed_pass = bcrypt.hashpw(user_register_dto.password.encode('utf-8'), salt).decode('utf-8')
+            user_id = uuid.uuid4()
+
             user_profile_entity = UserProfile(
                 username=user_register_dto.username,
             )
             user_entity = User(
-                password=bcrypt.hash(user_register_dto.password),
+                password=hashed_pass,
                 email=user_register_dto.email,
-                profile_id=user_profile_entity.id,
-                status=UserStatus.ACTIVE.value
+                status=UserStatus.ACTIVE.value,
+                profile=user_profile_entity,
             )
-            user_entity.profile = user_profile_entity
+
+            self.db_session.add(user_entity)
+
+            await self.db_session.flush()
+
+            return_dto = UserResponseDTO.from_entity(user_entity)
+            refresh_token = self._create_token(user_entity)
+            session_id = await self._create_session(user_entity, redis)
 
             await self.db_session.commit()
-            await self.db_session.refresh(user_entity)
 
-            return UserResponseDTO.from_entity(user_entity)
+            return (return_dto, refresh_token, session_id)
         except IntegrityError as e:
             raise ConflictException("This user data ruins some constrains") from e
  
-    async def auth_user(self, user_auth_dto: UserAuthDTO) -> UserResponseDTO:
+
+    async def auth_user(self, user_auth_dto: UserAuthDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
         user_query = select(User).where(User.email == user_auth_dto.email).options(joinedload(User.profile))
         user_result = await self.db_session.execute(user_query)
         user = user_result.scalar_one_or_none()
@@ -88,7 +112,32 @@ class AuthService:
         if not user:
             raise NotFoundException("Cannot find user with such email.")
 
-        if bcrypt.verify(user_auth_dto.password, user.password):
-            raise UnauthorizedException("Invalid email or password.")
+        if bcrypt.checkpw(
+            user_auth_dto.password.encode('utf-8'), 
+            user.password.encode('utf-8')
+        ):
+            raise UnauthorizedException("Invalid password.")
 
-        return UserResponseDTO.from_entity(user)
+        return (
+            UserResponseDTO.from_entity(user),
+            self._create_token(user),
+            await self._create_session(user, redis)
+        )
+
+
+    async def auth_via_token(self, token: str, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
+        user_payload = self._decode_token(token)
+        user_id = user_payload["sub"]
+
+        user_query = select(User).where(User.id == user_id).options(joinedload(User.profile))
+        user_result = await self.db_session.execute(user_query)
+        user = user_result.scalar_one_or_none()
+
+        if not user:
+            raise NotFoundException("Cannot find user with such email.")
+
+        return (
+            UserResponseDTO.from_entity(user),
+            self._create_token(user),
+            await self._create_session(user, redis)
+        )
