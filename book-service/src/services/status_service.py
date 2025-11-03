@@ -115,7 +115,7 @@ class StatusService:
         if user_context.is_admin:
             return True
         
-        if user_context.user_id == str(author_profile.user_profile_id):
+        if user_context.user_id == str(author_profile.user_id):
             allowed_owner_statuses = [AuthorProfileStatus.PRIVATE.value, AuthorProfileStatus.ACTIVE.value]
             return new_status in allowed_owner_statuses
         

@@ -63,10 +63,9 @@ async def auth_user(
     allowed_roles=[UserRole.GUEST],
     require_authentication=False
 )
-async def auth_user(
+async def auth_user_with_token(
     request: Request,
     response: Response,
-    user_authdto: UserAuthDTO,
     db: DatabaseSession,
     user_context: UserContext,
     redis: RedisClient
@@ -74,6 +73,7 @@ async def auth_user(
     auth_service = AuthService(db, user_context)
 
     token = request.cookies.get("refresh_token", "")
+    logger.debug(f"token {token}")
 
     user, new_token, session_id = await auth_service.auth_via_token(token, redis)
 

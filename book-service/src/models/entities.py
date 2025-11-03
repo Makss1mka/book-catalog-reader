@@ -10,7 +10,7 @@ class AuthorProfile(Base):
     __tablename__ = 'author_profiles'
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
-    user_profile_id = Column(UUID, nullable=False)
+    user_id = Column(UUID, nullable=False)
     name = Column(String, nullable=False)
     rating = Column(Float, default=0.0)
     common_genres = Column(ARRAY(String))

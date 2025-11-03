@@ -2,7 +2,7 @@ from src.models.enums import UserStatus, UserRole
 from src.models.response_dtos import UserResponseDTO
 from src.models.request_dtos import UserRegistrationDTO, UserAuthDTO
 from src.middlewares.auth_middleware import UserContext
-from src.models.entities import User, UserProfile
+from src.models.entities import User
 from src.globals import TOKEN_SECRET, TOKEN_TTL, REDIS_SESSION_TTL
 from src.exceptions.code_exceptions import (
     NotFoundException, ConflictException, UnauthorizedException,
@@ -35,7 +35,7 @@ class AuthService:
 
     def _create_token(self, user: User) -> str:
         payload = {
-            "sub": str(user.profile.id),
+            "sub": str(user.id),
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=TOKEN_TTL),
             "iat": datetime.datetime.now(datetime.timezone.utc)
         }
@@ -53,11 +53,14 @@ class AuthService:
 
     async def _create_session(self, user: User, redis: Redis) -> str:
         user_payload = {
-            "user-id": str(user.profile.id),
-            "user-name": user.profile.username,
+            "user-id": str(user.id),
+            "user-name": user.username,
             "user-role": user.role,
             "user-status": user.status
         }
+
+        if user_payload.get("user-status", "") == UserStatus.BLOCKED.value:
+            user_payload["user-blocked_for"] = user.blocked_for
 
         session_id = str(uuid.uuid4())
 
@@ -67,35 +70,31 @@ class AuthService:
 
 
     async def register_user(self, user_register_dto: UserRegistrationDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
-        user_query = select(User).where(User.email == user_register_dto.email).options(joinedload(User.profile))
-        user_result = await self.db_session.execute(user_query)
-        user = user_result.scalar_one_or_none()
+        similar_user_query = select(User).where(User.email == user_register_dto.email)
+        similar_user_result = await self.db_session.execute(similar_user_query)
+        similar_user = similar_user_result.scalar_one_or_none()
 
-        if user:
+        if similar_user:
             raise ConflictException("User with such email has already exist.")
 
         try:
             salt = bcrypt.gensalt(rounds=12)
             hashed_pass = bcrypt.hashpw(user_register_dto.password.encode('utf-8'), salt).decode('utf-8')
-            user_id = uuid.uuid4()
 
-            user_profile_entity = UserProfile(
-                username=user_register_dto.username,
-            )
-            user_entity = User(
+            user = User(
                 password=hashed_pass,
+                username=user_register_dto.username,
                 email=user_register_dto.email,
                 status=UserStatus.ACTIVE.value,
-                profile=user_profile_entity,
             )
 
-            self.db_session.add(user_entity)
+            self.db_session.add(user)
 
             await self.db_session.flush()
 
-            return_dto = UserResponseDTO.from_entity(user_entity)
-            refresh_token = self._create_token(user_entity)
-            session_id = await self._create_session(user_entity, redis)
+            return_dto = UserResponseDTO.from_entity(user)
+            refresh_token = self._create_token(user)
+            session_id = await self._create_session(user, redis)
 
             await self.db_session.commit()
 
@@ -105,14 +104,14 @@ class AuthService:
  
 
     async def auth_user(self, user_auth_dto: UserAuthDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
-        user_query = select(User).where(User.email == user_auth_dto.email).options(joinedload(User.profile))
+        user_query = select(User).where(User.email == user_auth_dto.email)
         user_result = await self.db_session.execute(user_query)
         user = user_result.scalar_one_or_none()
 
         if not user:
             raise NotFoundException("Cannot find user with such email.")
 
-        if bcrypt.checkpw(
+        if not bcrypt.checkpw(
             user_auth_dto.password.encode('utf-8'), 
             user.password.encode('utf-8')
         ):
@@ -129,7 +128,7 @@ class AuthService:
         user_payload = self._decode_token(token)
         user_id = user_payload["sub"]
 
-        user_query = select(User).where(User.id == user_id).options(joinedload(User.profile))
+        user_query = select(User).where(User.id == user_id)
         user_result = await self.db_session.execute(user_query)
         user = user_result.scalar_one_or_none()
 

@@ -33,7 +33,7 @@ class BookService:
         book_data: BookCreateDTO, 
         user_context: UserContext
     ) -> BookResponseDTO:
-        author_query = select(AuthorProfile).where(AuthorProfile.user_profile_id == user_context.user_id)
+        author_query = select(AuthorProfile).where(AuthorProfile.user_id == user_context.user_id)
         author_result = await self.db_session.execute(author_query)
         author = author_result.scalar_one_or_none()
         

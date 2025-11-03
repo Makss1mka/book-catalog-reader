@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 class AuthorProfileResponseDTO(BaseModel):
     id: str
-    user_profile_id: str
     name: str
     rating: float
     common_genres: List[str]
@@ -22,7 +21,6 @@ class AuthorProfileResponseDTO(BaseModel):
     def from_entity(cls, entity: AuthorProfile) -> 'AuthorProfileResponseDTO':
         return cls(
             id=str(entity.id),
-            user_profile_id=str(entity.user_profile_id),
             name=entity.name,
             rating=entity.rating,
             common_genres=entity.common_genres or [],

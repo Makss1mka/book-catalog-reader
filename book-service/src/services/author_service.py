@@ -24,10 +24,10 @@ class AuthorProfileService:
     async def create_author_profile(
         self, 
         author_data: AuthorProfileCreateDTO, 
-        user_profile_id: uuid.UUID
+        user_id: uuid.UUID
     ) -> AuthorProfileResponseDTO:
         existing_query = select(AuthorProfile).where(
-            AuthorProfile.user_profile_id == user_profile_id
+            AuthorProfile.user_id == user_id
         )
         existing_result = await self.db_session.execute(existing_query)
         existing_profile = existing_result.scalar_one_or_none()
@@ -36,8 +36,8 @@ class AuthorProfileService:
             raise ConflictException("Author profile already exists for this user")
         
         author_profile = AuthorProfile(
-            id=user_profile_id,
-            user_profile_id=user_profile_id,
+            id=user_id,
+            user_id=user_id,
             name=author_data.name,
             common_genres=author_data.common_genres,
             status=AuthorProfileStatus.ACTIVE.value
@@ -73,7 +73,7 @@ class AuthorProfileService:
         if not check_resource_access(
             user_context, 
             author_profile.status, 
-            author_profile.user_profile_id
+            author_profile.user_id
         ):
             raise HTTPException(status_code=403, detail=get_resource_access_response(author_profile.status))
         
@@ -92,8 +92,6 @@ class AuthorProfileService:
         if not author_profile:
             raise NotFoundException("Author profile not found")
         
-        logger.info(f"{user_context.user_id} {user_context.user_name} {user_context.user_role} {user_context.user_status}")
-        logger.info(f"{author_profile.id}")
         if not self._can_modify_author_profile(user_context, author_profile):
             raise ForbiddenException("You don't have permission to modify this author profile")
         
@@ -159,7 +157,7 @@ class AuthorProfileService:
             if check_resource_access(
                 user_context, 
                 profile.status, 
-                profile.user_profile_id
+                profile.user_id
             ):
                 accessible_profiles.append(AuthorProfileResponseDTO.from_entity(profile))
         
@@ -167,11 +165,11 @@ class AuthorProfileService:
     
     async def _get_author_profile_by_user_id_internal(
         self, 
-        user_profile_id: uuid.UUID, 
+        user_id: uuid.UUID, 
         include_books: bool = True
     ) -> AuthorProfileResponseDTO:
         query = select(AuthorProfile).where(
-            AuthorProfile.user_profile_id == user_profile_id
+            AuthorProfile.user_id == user_id
         )
         
         if include_books:
@@ -220,7 +218,7 @@ class AuthorProfileService:
         if user_context.is_admin:
             return True
         
-        if user_context.user_id == author_profile.user_profile_id:
+        if user_context.user_id == author_profile.user_id:
             return True
         
         return False
