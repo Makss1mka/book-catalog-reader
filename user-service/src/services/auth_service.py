@@ -1,16 +1,14 @@
-from src.models.enums import UserStatus, UserRole
-from src.models.response_dtos import UserResponseDTO
+from src.models.enums import UserStatus
 from src.models.request_dtos import UserRegistrationDTO, UserAuthDTO
 from src.middlewares.auth_middleware import UserContext
 from src.models.entities import User
-from src.globals import TOKEN_SECRET, TOKEN_TTL, REDIS_SESSION_TTL
+from src.globals import TOKEN_SECRET, TOKEN_TTL
 from src.exceptions.code_exceptions import (
     NotFoundException, ConflictException, UnauthorizedException,
 )
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 from redis.asyncio import Redis
 from sqlalchemy import select
 
@@ -52,6 +50,8 @@ class AuthService:
             raise UnauthorizedException("Token is invalid")
 
     async def _create_session(self, user: User, redis: Redis) -> str:
+        return ""
+
         user_payload = {
             "user-id": str(user.id),
             "user-name": user.username,
@@ -64,12 +64,12 @@ class AuthService:
 
         session_id = str(uuid.uuid4())
 
-        await redis.set(session_id, json.dumps(user_payload), REDIS_SESSION_TTL)
+        await redis.set(session_id, json.dumps(user_payload), 10)
 
         return session_id
 
 
-    async def register_user(self, user_register_dto: UserRegistrationDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
+    async def register_user(self, user_register_dto: UserRegistrationDTO, redis: Redis) -> tuple[User, TokenStr, SessionIdStr]:
         similar_user_query = select(User).where(User.email == user_register_dto.email)
         similar_user_result = await self.db_session.execute(similar_user_query)
         similar_user = similar_user_result.scalar_one_or_none()
@@ -92,18 +92,17 @@ class AuthService:
 
             await self.db_session.flush()
 
-            return_dto = UserResponseDTO.from_entity(user)
             refresh_token = self._create_token(user)
             session_id = await self._create_session(user, redis)
 
             await self.db_session.commit()
 
-            return (return_dto, refresh_token, session_id)
+            return (user, refresh_token, session_id)
         except IntegrityError as e:
             raise ConflictException("This user data ruins some constrains") from e
  
 
-    async def auth_user(self, user_auth_dto: UserAuthDTO, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
+    async def auth_user(self, user_auth_dto: UserAuthDTO, redis: Redis) -> tuple[User, TokenStr, SessionIdStr]:
         user_query = select(User).where(User.email == user_auth_dto.email)
         user_result = await self.db_session.execute(user_query)
         user = user_result.scalar_one_or_none()
@@ -118,13 +117,13 @@ class AuthService:
             raise UnauthorizedException("Invalid password.")
 
         return (
-            UserResponseDTO.from_entity(user),
+            user,
             self._create_token(user),
             await self._create_session(user, redis)
         )
 
 
-    async def auth_via_token(self, token: str, redis: Redis) -> tuple[UserResponseDTO, TokenStr, SessionIdStr]:
+    async def auth_via_token(self, token: str, redis: Redis) -> tuple[User, TokenStr, SessionIdStr]:
         user_payload = self._decode_token(token)
         user_id = user_payload["sub"]
 
@@ -136,7 +135,7 @@ class AuthService:
             raise NotFoundException("Cannot find user with such email.")
 
         return (
-            UserResponseDTO.from_entity(user),
+            user,
             self._create_token(user),
             await self._create_session(user, redis)
         )

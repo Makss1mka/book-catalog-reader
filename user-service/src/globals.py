@@ -53,14 +53,29 @@ MAX_SEARCH_RESULTS: int = 1000
 MAX_PAGES_PER_REQUEST: int = 10
 
 #
-# Token configs
+# HEADER'S NAMES
 #
-TOKEN_SECRET: str = os.environ.get("TOKEN_SECRET")
-TOKEN_TTL: int = 30 * 60 * 60
+USER_ID_HEADER_NAME = "x-user-id"
+USER_ROLE_HEADER_NAME = "x-user-role"
+USER_NAME_HEADER_NAME = "x-user-name"
+USER_STATUS_HEADER_NAME = "x-user-status"
+USER_BLOCKED_FOR_HEADER_NAME = "x-user-blocked-for"
+TRACE_ID_HEADER_NAME = "x-trace-id"
 
 #
 # Redis configs
 #
 REDIS_HOST: str = os.environ.get("REDIS_HOST")
 REDIS_PORT: int = os.environ.get("REDIS_PORT")
-REDIS_SESSION_TTL: int = 10 * 60
+
+#
+# Token configs
+#
+TOKEN_SECRET: str = os.environ.get("TOKEN_SECRET")
+TOKEN_TTL: int = 30 * 60 * 60
+TOKEN_COOKIE_NAME = "refresh_token"
+TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+TOKEN_COOKIE_SECURE = False
+TOKEN_COOKIE_HTTP_ONLY = True
+TOKEN_COOKIE_SAME_SITE = "Lax"
+

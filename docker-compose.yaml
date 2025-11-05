@@ -31,6 +31,27 @@ services:
     networks:
       - backend
 
+  gateway:
+    build:
+      context: ./api-gateway
+      args:
+        APP_PORT: 
+    container_name: "gateway"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_HOST: "gateway"
+      APP_PORT: 8080
+      REDIS_HOST: ${GATEWAY_REDIS_HOST}
+      REDIS_PORT: ${GATEWAY_REDIS_PORT}
+    networks:
+      - backend
+
   book-service:
     build:
       context: ./book-service
