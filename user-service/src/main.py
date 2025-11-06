@@ -1,7 +1,6 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
 from src.api.users_cruds_api import user_crud_router
 from src.api.auth_api import auth_router
-from src.core.redis_core import redis_client_init
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
 from src.exceptions.code_exceptions import CodeException
@@ -10,11 +9,11 @@ from src.exceptions.exception_handlers import (
     code_exception_handler,
 )
 from src.middlewares.auth_middleware import UserContextMiddleware
+from src.middlewares.add_headers_middleware import AddTraceIdHeadersMiddleware
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
-    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME, DB_ECHO_MODE,
-    REDIS_PORT, REDIS_HOST
+    DB_HOST, DB_URL, DB_USER, DB_PASSWORD, DB_NAME, DB_ECHO_MODE
 )
 
 from fastapi.exceptions import RequestValidationError
@@ -36,30 +35,20 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     logger: logging.Logger = logging.getLogger(__name__)
 
-    database_config = DatabaseConfig(
-        db_url=DB_URL,
-        db_username=DB_USER,
-        db_password=DB_PASSWORD,
-        db_host=DB_HOST,
-        db_name=DB_NAME
-    )
-    pool_config = PoolConfig(
-        echo=DB_ECHO_MODE,
-        hide_parameters=not DB_ECHO_MODE
-    )
-    connection_config = ConnectionConfig()
-
     await init_engine(
         app=app,
-        db_config=database_config,
-        pool_config=pool_config,
-        connection_config=connection_config
-    )
-
-    await redis_client_init(
-        app=app,
-        redis_host=REDIS_HOST,
-        redis_port=REDIS_PORT
+        db_config=DatabaseConfig(
+            db_url=DB_URL,
+            db_username=DB_USER,
+            db_password=DB_PASSWORD,
+            db_host=DB_HOST,
+            db_name=DB_NAME
+        ),
+        pool_config=PoolConfig(
+            echo=DB_ECHO_MODE,
+            hide_parameters=not DB_ECHO_MODE
+        ),
+        connection_config=ConnectionConfig()
     )
 
     logger.info(f"Server is started on {APP_HOST}:{APP_PORT}")
@@ -70,6 +59,7 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(lifespan=app_lifespan)
 
 app.add_middleware(UserContextMiddleware)
+app.add_middleware(AddTraceIdHeadersMiddleware)
 
 app.include_router(auth_router)
 app.include_router(user_crud_router)

@@ -21,6 +21,28 @@ class UserResponseDTO(BaseModel):
         )
 
 
+class UserAuthResponseDTO(BaseModel):
+    access_token: str
+    refresh_token: str
+    user_data: UserResponseDTO
+
+    @classmethod
+    def from_entity(cls, access_token: str, refresh_token: str, user: User) -> 'UserAuthDTO':
+        return cls(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user_data=UserResponseDTO.from_entity(user)
+        )
+
+
+class AccessTokenResponseDTO(BaseModel):
+    access_token: str
+ 
+    @classmethod
+    def from_entity(cls, access_token: str) -> 'AccessTokenResponseDTO':
+        return cls(access_token=access_token)
+
+
 class StatusUpdateResponseDTO(BaseModel):
     id: str
     old_status: str

@@ -9,7 +9,7 @@ class UserRegistrationDTO(BaseModel):
     email: EmailStr
 
 
-class UserAuthDTO(BaseModel):
+class UserLoginDTO(BaseModel):
     password: str = Field(..., min_length=6, max_length=50)
     email: EmailStr
 
@@ -20,3 +20,7 @@ class UserUpdateDTO(BaseModel):
 
 class UserStatusUpdateDTO(BaseModel):
     status: UserStatus = Field(...)
+
+
+class RefreshTokenDTO(BaseModel):
+    refresh_token: str = Field(...)

@@ -71,11 +71,9 @@ REDIS_PORT: int = os.environ.get("REDIS_PORT")
 #
 # Token configs
 #
-TOKEN_SECRET: str = os.environ.get("TOKEN_SECRET")
-TOKEN_TTL: int = 30 * 60 * 60
-TOKEN_COOKIE_NAME = "refresh_token"
-TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
-TOKEN_COOKIE_SECURE = False
-TOKEN_COOKIE_HTTP_ONLY = True
-TOKEN_COOKIE_SAME_SITE = "Lax"
+ACCESS_TOKEN_SECRET: str = os.environ.get("ACCESS_TOKEN_SECRET")
+ACCESS_TOKEN_TTL: int = 5 * 60
+REFRESH_TOKEN_SECRET: str = os.environ.get("REFRESH_TOKEN_SECRET")
+REFRESH_TOKEN_TTL: int = 7 * 24 * 60 * 60
+
 
