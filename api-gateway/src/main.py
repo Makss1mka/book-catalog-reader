@@ -1,16 +1,13 @@
-from src.api.main_router import main_router
-from src.core.redis_core import redis_client_init
+from src.api.main_proxy_api import main_router
+from src.api.auth_api import auth_router
 from src.core.logging_core import setup_logging
+from src.core.proxy_session_core import proxy_client_session_init
 from src.exceptions.code_exceptions import CodeException
 from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
     code_exception_handler,
 )
-from src.globals import (
-    APP_HOST, APP_PORT,
-    LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
-    REDIS_PORT, REDIS_HOST
-)
+from src.globals import APP_HOST, APP_PORT, LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT
 
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
@@ -31,19 +28,17 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     logger: logging.Logger = logging.getLogger(__name__)
 
-    await redis_client_init(
-        app=app,
-        redis_host=REDIS_HOST,
-        redis_port=REDIS_PORT
-    )
-
-    logger.info(f"Server is started on {APP_HOST}:{APP_PORT}")
-    yield
-    logger.error("Server shutdown...")
+    async with (
+        proxy_client_session_init(app)
+    ):
+        logger.info(f"Server is started on {APP_HOST}:{APP_PORT}")
+        yield
+        logger.error("Server shutdown...")
 
 
 app = FastAPI(lifespan=app_lifespan)
 
+app.include_router(auth_router)
 app.include_router(main_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)

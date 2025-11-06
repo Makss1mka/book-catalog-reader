@@ -27,9 +27,8 @@ SessionIdStr = str
 
 
 class AuthService:
-    def __init__(self, db_session: AsyncSession, user_context: UserContext):
+    def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
-        self.user_context = user_context
 
 
     def _create_access_token(self, user: User) -> str:
@@ -51,7 +50,9 @@ class AuthService:
             "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=REFRESH_TOKEN_TTL),
             "iat": datetime.datetime.now(datetime.timezone.utc)
         }
+        
         token = jwt.encode(payload, REFRESH_TOKEN_SECRET, algorithm="HS256")
+
         return token
 
     def _decode_refresh_token(self, token: str) -> dict:
@@ -90,7 +91,7 @@ class AuthService:
             refresh_token = self._create_refresh_token(user)
             access_token = self._create_access_token(user)
             
-            return_dto = UserAuthResponseDTO(access_token, refresh_token, user)
+            return_dto = UserAuthResponseDTO.from_data(access_token, refresh_token, user)
 
             await self.db_session.commit()
 
@@ -113,7 +114,7 @@ class AuthService:
         ):
             raise UnauthorizedException("Invalid password.")
 
-        return UserAuthResponseDTO(
+        return UserAuthResponseDTO.from_data(
             self._create_refresh_token(user),
             self._create_access_token(user),
             user

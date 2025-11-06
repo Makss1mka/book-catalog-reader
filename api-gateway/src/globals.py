@@ -27,12 +27,13 @@ REDIS_PORT: int = os.environ.get("REDIS_PORT")
 #
 # SESSION
 #
-SESSION_COOKIE_NAME = "session_id"
-SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_HTTP_ONLY = True
-SESSION_COOKIE_SAME_SITE = "Lax"
-SESSION_CACHE_TTL = 60 * 5
+TOKEN_COOKIE_NAME = "token"
+TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+TOKEN_COOKIE_SECURE = False
+TOKEN_COOKIE_HTTP_ONLY = True
+TOKEN_COOKIE_SAME_SITE = "Lax"
+TOKEN_CACHE_TTL = 60 * 5
+ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 
 #
 # ROUTING
@@ -47,6 +48,14 @@ SERVICES_URLS = {
     "book-service": "http://book-service:8082"
 }
 STATIC_NGINX_URL = "http://static-nginx"
+
+#
+# Auth api configs
+#
+AUTH_SERVICE_NAME = "/user-service"
+REGISTER_URL = "/register"
+LOGIN_URL = "/login"
+REFRESH_URL = "/refresh"
 
 #
 # HEADER'S NAMES
