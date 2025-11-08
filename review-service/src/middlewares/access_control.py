@@ -25,21 +25,15 @@ class AccessControl:
         self.resource_owner_check = resource_owner_check
     
     def check_access(self, user_context, resource_owner_id: str = None) -> bool:
-        """Проверяет доступ пользователя к ресурсу"""
-        
-        # Проверка аутентификации
         if self.require_authentication and not user_context.is_authenticated:
             return False
         
-        # Проверка роли
         if user_context.user_role not in self.allowed_roles:
             return False
         
-        # Проверка статуса пользователя
         if user_context.user_status and user_context.user_status.value not in self.allowed_statuses:
             return False
         
-        # Проверка владельца ресурса
         if self.resource_owner_check and resource_owner_id:
             if user_context.user_id != resource_owner_id and not user_context.is_admin:
                 return False

@@ -5,6 +5,7 @@ from src.middlewares.auth_middleware import UserContext
 from src.models.entities import Review, ReviewLike
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, desc, asc, and_
 from datetime import datetime
 import logging
@@ -63,16 +64,17 @@ class ReviewService:
 
         offset = (pagination["page_number"] - 1) * pagination["page_size"]
         query = query.offset(offset).limit(pagination["page_size"])
-        
+        query = query.options(selectinload(Review.likers))
+
         result = await self._db_session.execute(query)
         reviews = result.scalars().all()
         
         found_reviews = []
         if my_review: 
-            found_reviews.append(ReviewResponseDTO.from_entity(my_review))
+            found_reviews.append(ReviewResponseDTO.from_entity(my_review, True, self._user_context.user_id))
         for i in reviews: 
             if i.user_id == self._user_context.user_id: continue
-            found_reviews.append(ReviewResponseDTO.from_entity(i))
+            found_reviews.append(ReviewResponseDTO.from_entity(i, True, self._user_context.user_id))
 
         return ReviewsListResponseDTO(
             reviews=found_reviews,

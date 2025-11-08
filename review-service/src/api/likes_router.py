@@ -3,7 +3,7 @@ from src.middlewares.access_control import require_access
 from src.services.like_service import LikeService
 from src.models.enums import UserRole
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 import logging
 import uuid
 
@@ -17,6 +17,7 @@ likes_router = APIRouter(prefix="/reviews/likes", tags=["Likes CRUD"])
     require_authentication=True
 )
 async def add_like(
+    request: Request,
     review_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
@@ -32,6 +33,7 @@ async def add_like(
     require_authentication=True
 )
 async def delete_like(
+    request: Request,
     review_id: uuid.UUID,
     db: DatabaseSession,
     user_context: UserContext
