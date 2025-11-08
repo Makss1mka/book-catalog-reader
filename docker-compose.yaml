@@ -109,6 +109,29 @@ services:
     networks:
       - backend
 
+  review-service:
+    build:
+      context: ./review-service
+      args:
+        APP_PORT: 
+    container_name: "review-service"
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_HOST: "review-service"
+      APP_PORT: 8084
+      DB_URL: ${REVIEW_SERVICE_DB_URL}
+      DB_USER: ${REVIEW_SERVICE_DB_USERNAME}
+      DB_PASSWORD: ${REVIEW_SERVICE_DB_PASSWORD}
+      DB_NAME: ${REVIEW_SERVICE_DB_NAME}
+      DB_HOST: ${REVIEW_SERVICE_DB_HOST}
+    networks:
+      - backend
 
 networks:
   backend:
