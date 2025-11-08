@@ -53,7 +53,7 @@ class Book(Base):
     file_path = Column(String)
     cover_path = Column(String)
     genres = Column(ARRAY(String))
-    added_date = Column(Date)
+    added_date = Column(DateTime)
     status = Column(String, nullable=False, default='ON_MODERATE', server_default=text("'ON_MODERATE'"))
     total_rating = Column(Float, default=0.0, server_default=text('0.0'))
     likes_count = Column(Integer, default=0, server_default=text('0'))
@@ -70,9 +70,11 @@ class Review(Base):
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4, server_default=text('gen_random_uuid()'))
     book_id = Column(UUID, ForeignKey('books.id'), nullable=False)
-    user_id = Column(UUID, ForeignKey('users.id'), nullable=False)
+    user_id = Column(UUID, ForeignKey('users.id'), nullable=False, unique=True)
+    user_name = Column(String, nullable=False)
     text = Column(String, nullable=False)
     rating = Column(Integer, nullable=False, default=0)
+    added_date = Column(DateTime, nullable=False)
 
     book = relationship("Book", back_populates="reviews")
     user = relationship("User", back_populates="reviews")
