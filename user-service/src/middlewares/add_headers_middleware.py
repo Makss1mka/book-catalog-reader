@@ -8,6 +8,7 @@ class AddTraceIdHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
         
+        logger.debug(response.headers)
         response.headers[TRACE_ID_HEADER_NAME] = request.headers.get(TRACE_ID_HEADER_NAME, None)
 
         return response

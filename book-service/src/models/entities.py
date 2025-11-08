@@ -1,4 +1,4 @@
-from sqlalchemy import Column, UUID, String, Float, Integer, Date, ForeignKey, text
+from sqlalchemy import Column, UUID, String, Float, Integer, DateTime, ForeignKey, text
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 import uuid
@@ -31,7 +31,7 @@ class Book(Base):
     file_path = Column(String)
     cover_path = Column(String)
     genres = Column(ARRAY(String))
-    added_date = Column(Date)
+    added_date = Column(DateTime)
     status = Column(String, nullable=False, default='ON_MODERATE')
     total_rating = Column(Float, default=0.0)
     likes_count = Column(Integer, default=0)

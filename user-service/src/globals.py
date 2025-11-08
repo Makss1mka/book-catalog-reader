@@ -72,7 +72,7 @@ REDIS_PORT: int = os.environ.get("REDIS_PORT")
 # Token configs
 #
 ACCESS_TOKEN_SECRET: str = os.environ.get("ACCESS_TOKEN_SECRET")
-ACCESS_TOKEN_TTL: int = 5 * 60
+ACCESS_TOKEN_TTL: int = 10 * 60
 REFRESH_TOKEN_SECRET: str = os.environ.get("REFRESH_TOKEN_SECRET")
 REFRESH_TOKEN_TTL: int = 7 * 24 * 60 * 60
 

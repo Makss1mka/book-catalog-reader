@@ -139,7 +139,7 @@ class BookSearchService:
             'likes': Book.likes_count,
             'reviews': Book.reviews_count,
             'pages': Book.pages_count,
-            'issued_date': Book.issued_date,
+            'added_date': Book.added_date,
             'author_rating': AuthorProfile.rating,
             'author_likes': AuthorProfile.likes_count,
             'author_books': AuthorProfile.books_count

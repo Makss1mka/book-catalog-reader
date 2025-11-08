@@ -42,7 +42,7 @@ async def proxy_api(
     token_service = TokenService(req, resp)
     req_headers = dict(req.headers)
     add_trace_id(req_headers)
-    token_service.add_user_context(req_headers)
+    await token_service.add_user_context(req_headers)
 
     target_url = urljoin(SERVICES_URLS[service], path)
     logger.debug(f"Routing to {target_url}")
@@ -72,6 +72,7 @@ async def proxy_api(
             content = await response.read()
             try:
                 json_data = json.loads(content)
+                resp.status_code = response.status
                 await response.release()
                 return json_data
             except json.JSONDecodeError as e:

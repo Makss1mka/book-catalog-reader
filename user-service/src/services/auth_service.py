@@ -115,8 +115,8 @@ class AuthService:
             raise UnauthorizedException("Invalid password.")
 
         return UserAuthResponseDTO.from_data(
-            self._create_refresh_token(user),
             self._create_access_token(user),
+            self._create_refresh_token(user),
             user
         )
 

@@ -20,13 +20,15 @@ class TokenService:
             payload = jwt.decode(token, ACCESS_TOKEN_SECRET, algorithms=["HS256"])
             return payload
         except jwt.ExpiredSignatureError:
-            raise UnauthorizedException("Refresh token has expired")
+            raise UnauthorizedException("Access token has expired")
         except jwt.InvalidTokenError:
-            raise UnauthorizedException("Refresh token is invalid")
+            raise UnauthorizedException("Access token is invalid")
    
     async def add_user_context(self, headers: dict) -> None:
         token = self._req.cookies.get(TOKEN_COOKIE_NAME)
-        user_data = self._decode_access_token(token)
+        user_data = await self._decode_access_token(token)
+
+        logger.debug(f"USER CONTEXT - {user_data}")
 
         try:
             headers[USER_ID_HEADER_NAME] = user_data["sub"]
