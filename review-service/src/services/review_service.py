@@ -1,4 +1,4 @@
-from src.exceptions.code_exceptions import NoContentException, NotFoundException, ConflictException, BadRequestException
+from src.exceptions.code_exceptions import ForbiddenException, NoContentException, NotFoundException, ConflictException, BadRequestException
 from src.models.response_dtos import ReviewResponseDTO, ReviewsListResponseDTO
 from src.models.crud_request_dtos import ReviewCreateDTO, ReviewUpdateDTO
 from src.middlewares.auth_middleware import UserContext
@@ -87,7 +87,7 @@ class ReviewService:
 
 
     async def create_review(self, review_create_dto: ReviewCreateDTO) -> ReviewResponseDTO:
-        review_query = select(Review).where(Review.user_id == self._user_context.user_id, Review.book_id == review_create_dto.book_id)
+        review_query = select(Review).where(and_(Review.user_id == self._user_context.user_id, Review.book_id == review_create_dto.book_id))
         review_result = await self._db_session.execute(review_query)
         review = review_result.scalar_one_or_none()
         
@@ -128,7 +128,7 @@ class ReviewService:
             not self._user_context.is_admin
             and self._user_context.user_id != review.user_id
         ):
-            raise ConflictException("You don't have permission to modify this review")
+            raise ForbiddenException("You don't have permission to modify this review")
         
         is_smth_changed = False
         if review_update_dto.text is not None:
@@ -139,13 +139,17 @@ class ReviewService:
             is_smth_changed = True
         
         if is_smth_changed:
-            await self._db_session.flush()
+            try:
+                await self._db_session.flush()
 
-            updated_review_dto = ReviewResponseDTO.from_entity(review)
+                updated_review_dto = ReviewResponseDTO.from_entity(review)
 
-            await self._db_session.commit()
+                await self._db_session.commit()
 
-            return updated_review_dto
+                return updated_review_dto
+            except Exception as e:
+                logger.exception(e)
+                raise ConflictException("Cannot add status cause of some conflicts or ruins of rules")
         else:
             raise NoContentException("Nothing changed")
     

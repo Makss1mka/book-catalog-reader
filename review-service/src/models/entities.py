@@ -10,7 +10,7 @@ class Review(Base):
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     book_id = Column(UUID, nullable=False)
-    user_id = Column(UUID, nullable=False, unique=True)
+    user_id = Column(UUID, nullable=False)
     user_name = Column(String, nullable=False)
     text = Column(String, nullable=False)
     rating = Column(Integer, nullable=False, default=0)

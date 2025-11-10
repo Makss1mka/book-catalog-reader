@@ -70,7 +70,7 @@ class Review(Base):
 
     id = Column(UUID, primary_key=True, default=uuid.uuid4, server_default=text('gen_random_uuid()'))
     book_id = Column(UUID, ForeignKey('books.id'), nullable=False)
-    user_id = Column(UUID, ForeignKey('users.id'), nullable=False, unique=True)
+    user_id = Column(UUID, ForeignKey('users.id'), nullable=False)
     user_name = Column(String, nullable=False)
     text = Column(String, nullable=False)
     rating = Column(Integer, nullable=False, default=0)
@@ -86,6 +86,8 @@ class UserBookStatus(Base):
     book_id = Column(UUID, ForeignKey('books.id'), primary_key=True)
     user_id = Column(UUID, ForeignKey('users.id'), primary_key=True)
     status = Column(String, nullable=False)
+    added_date = Column(DateTime, nullable=False)
+    end_page = Column(Integer, nullable=False, default=-1, server_default=text('-1'))
 
     book = relationship("Book", back_populates="book_statuses")
     user = relationship("User", back_populates="book_statuses")
