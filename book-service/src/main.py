@@ -1,8 +1,10 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
+from src.api.user_book_statuses_router import user_book_statuses_router
 from src.api.book_crud_router import book_crud_router
 from src.api.author_crud_router import author_crud_router
 from src.api.book_search_router import book_search_router
 from src.api.book_file_router import book_file_router
+from src.api.likes_router import likes_router
 from src.api.status_router import status_router
 from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
@@ -66,6 +68,8 @@ app = FastAPI(lifespan=app_lifespan)
 
 app.add_middleware(UserContextMiddleware)
 
+app.include_router(user_book_statuses_router)
+app.include_router(likes_router)
 app.include_router(status_router)
 app.include_router(book_search_router)
 app.include_router(book_crud_router)

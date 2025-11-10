@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import date
 from src.models.enums import BookStatus, AuthorProfileStatus
-from src.models.entities import Book, AuthorProfile
+from src.models.entities import Book, AuthorProfile, UserBookStatus
 
 logger = logging.getLogger(__name__)
 
@@ -104,3 +104,32 @@ class StatusUpdateResponseDTO(BaseModel):
     new_status: str
     message: str
 
+
+
+
+class UserBookStatusResponseDTO(BaseModel):
+    book_id: str
+    status: str
+    author_id: str
+    author_name: str
+    title: str
+    end_page: int
+    
+    @classmethod
+    def from_entity(cls, status: UserBookStatus) -> 'StatusedBookResponseDTO':
+        return cls(
+            status=status.status,
+            book_id=str(status.book_id),
+            author_id=str(status.book.author.id),
+            author_name=str(status.book.author.name),
+            title=status.book.title,
+            end_page=status.end_page
+        )
+
+
+class UserBookStatusListResponseDTO(BaseModel):
+    books: List[UserBookStatusResponseDTO]
+    total_count: int
+    page_number: int
+    page_size: int
+    total_pages: int

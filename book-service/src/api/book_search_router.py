@@ -12,10 +12,10 @@ from src.middlewares.access_control import require_access
 
 logger = logging.getLogger(__name__)
 
-book_search_router = APIRouter(prefix="/books", tags=["Book Search"])
+book_search_router = APIRouter(tags=["Book Search"])
 
 
-@book_search_router.get("/search", response_model=BookSearchResponseDTO)
+@book_search_router.get("/books/search", response_model=BookSearchResponseDTO)
 @require_access(
     allowed_roles=[UserRole.GUEST, UserRole.USER, UserRole.ADMIN],
     require_authentication=False

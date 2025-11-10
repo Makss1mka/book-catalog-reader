@@ -7,7 +7,7 @@ from src.annotations import DatabaseSession, UserContext
 from src.models.crud_request_dtos import BookStatusUpdateDTO, AuthorProfileStatusUpdateDTO
 from src.models.response_dtos import StatusUpdateResponseDTO
 from src.models.enums import UserRole
-from src.services.status_service import StatusService
+from src.services.system_status_service import StatusService
 from src.middlewares.access_control import require_access
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 status_router = APIRouter(tags=["Status Management"])
 
 
-@status_router.put("/books/{book_id}/status", response_model=StatusUpdateResponseDTO)
+@status_router.put("/books/{book_id}/system-status", response_model=StatusUpdateResponseDTO)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True
@@ -31,7 +31,7 @@ async def update_book_status(
     return await status_service.update_book_status(book_id, status_data, user_context)
 
 
-@status_router.put("/authors/{author_id}/status", response_model=StatusUpdateResponseDTO)
+@status_router.put("/authors/{author_id}/system-status", response_model=StatusUpdateResponseDTO)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True

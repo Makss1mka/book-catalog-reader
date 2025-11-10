@@ -22,3 +22,9 @@ class AuthorProfileStatus(str, Enum):
     PRIVATE = "PRIVATE"
     BLOCKED = "BLOCKED"
     ON_APILATION = "ON_APILATION"
+
+class UserBookStatusEnum(str, Enum):
+    READ = "READ"
+    READING = "READING"
+    DROP = "DROP"
+    LIKED = "LIKED"

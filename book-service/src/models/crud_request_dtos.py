@@ -1,7 +1,8 @@
+from uuid import UUID
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 from datetime import date
-from src.models.enums import BookStatus, AuthorProfileStatus
+from src.models.enums import BookStatus, AuthorProfileStatus, UserBookStatusEnum
 
 
 class BookCreateDTO(BaseModel):
@@ -64,3 +65,19 @@ class BookStatusUpdateDTO(BaseModel):
 
 class AuthorProfileStatusUpdateDTO(BaseModel):
     status: AuthorProfileStatus = Field(...)
+
+
+
+
+
+
+class UserBookStatusCreateDTO(BaseModel):
+    status: UserBookStatusEnum = Field(...)
+
+
+class UserBookStatusUpdateDTO(BaseModel):
+    status: Optional[UserBookStatusEnum] = Field(None)
+
+
+class UserBookReadingStatusEndPageUpdateDTO(BaseModel):
+    end_page: int = Field(...)

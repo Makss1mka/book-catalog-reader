@@ -39,3 +39,24 @@ class Book(Base):
     reviews_count = Column(Integer, default=0)
 
     author = relationship("AuthorProfile", back_populates="books")
+    likers = relationship("BookLike", back_populates="book", cascade="all, delete-orphan")
+    book_statuses = relationship("UserBookStatus", back_populates="book", cascade="all, delete-orphan")
+
+class UserBookStatus(Base):
+    __tablename__ = 'user_book_statuses'
+
+    book_id = Column(UUID, ForeignKey('books.id'), primary_key=True)
+    user_id = Column(UUID, primary_key=True)
+    status = Column(String, nullable=False)
+    added_date = Column(DateTime, nullable=False)
+    end_page = Column(Integer, nullable=False, default=-1)
+
+    book = relationship("Book", back_populates="book_statuses", uselist=False)
+
+class BookLike(Base):
+    __tablename__ = 'book_likes'
+
+    book_id = Column(UUID, ForeignKey('books.id'), primary_key=True)
+    user_id = Column(UUID, primary_key=True)
+
+    book = relationship("Book", back_populates="likers", uselist=False)
