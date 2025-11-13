@@ -57,7 +57,7 @@ export async function updateReadingEndPage(book: Book, new_end_page: number): Pr
     let url = `/api/book-service/books/${book.id}/user-status/end-page`;
 
     return await fetch_with_refresh<string>(url, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },

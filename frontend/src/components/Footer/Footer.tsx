@@ -37,8 +37,8 @@ export default function Footer() {
 
     return (
         <footer className="Footer">
-            <p className="Footer_SubText">2025 @ Raise | Best book shop in the universe</p>
-            <p className="Footer_PreSocialText">Ссылки на наши соц сети:</p>
+            <p className="Footer_SubText">2025 @ Raise | Best book catalog in the universe</p>
+            <p className="Footer_PreSocialText">Links on our:</p>
             <div className="Footer_Socials">
                 {
                     socials.map((socialItem, index) => {
