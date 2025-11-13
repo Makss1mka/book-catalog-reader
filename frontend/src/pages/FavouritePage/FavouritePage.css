@@ -1,0 +1,258 @@
+/* FavouritePage.css */
+.FavouritePage {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 80vh;
+}
+
+/* --- СТИЛИ ДЛЯ БЛОКА ПЕРЕКЛЮЧЕНИЯ (Switch buttons container) --- */
+.FavouritePage_SwitchButtons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Individual switch buttons */
+.FavouritePage_SwitchButton {
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #495057;
+    transition: all 0.3s ease;
+    /* Добавляем стили для активного состояния */
+    font-weight: 500;
+}
+
+.FavouritePage_SwitchButton:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+/* Улучшенный активный класс */
+.FavouritePage_SwitchButton.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+/* --- СТИЛИ ДЛЯ КАРТОЧКИ СТАТУСА КНИГИ (UserBookstatusCard) --- */
+
+.UserBookstatusCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 5px solid #007bff;
+}
+
+.UserBookstatusCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.UserBookstatusCard_LeftPart {
+    flex-grow: 1;
+    cursor: pointer;
+    padding-right: 15px;
+}
+
+.UserBookstatusCard_BookTitle {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.UserBookstatusCard_AuthorName {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.UserBookstatusCard_RigthPart {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    text-align: right;
+}
+
+.UserBookstatusCard_EndPage {
+    font-size: 0.8rem;
+    color: #888;
+    background-color: #f1f1f1;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.UserBookstatusCard_ContinueButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.UserBookstatusCard_ContinueButton:hover {
+    background-color: #218838;
+}
+
+/* --- СТИЛИ ДЛЯ КНОПКИ ЗАГРУЗКИ "ЕЩЕ" --- */
+
+.CatalogPage_LoadButton_Outer {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    grid-column: 1 / -1; /* Распространяется на всю ширину сетки */
+}
+
+.CatalogPage_LoadButton {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 10px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.CatalogPage_LoadButton:hover {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+/* --- СТИЛИ СПИСКА КАРТОЧЕК --- */
+.FavouritePage_BookCardsList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    padding: 10px;
+    justify-items: stretch; /* Важно: stretch, чтобы карточки занимали всю доступную ширину */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Loading state */
+.FavouritePage .Loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 1.2rem;
+    color: #666;
+    grid-column: 1 / -1;
+}
+
+/* Animation for book cards */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.FavouritePage_BookCardsList > * {
+    animation: fadeIn 0.5s ease forwards;
+    width: 100%;
+    /* max-width: 350px; Убираем max-width, чтобы не конфликтовать с grid-template-columns */
+}
+
+/* Hover effect for book cards */
+.FavouritePage_BookCardsList > *:hover {
+    transform: translateY(-3px); /* Скорректировано для consistency с UserBookstatusCard:hover */
+    transition: transform 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .FavouritePage_BookCardsList {
+        gap: 25px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .FavouritePage_BookCardsList {
+        grid-template-columns: repeat(3, minmax(200px, 1fr)); /* Немного уменьшил minmax */
+        gap: 20px;
+    }
+}
+
+@media (max-width: 900px) {
+    .FavouritePage_BookCardsList {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .FavouritePage_SwitchButtons {
+        gap: 10px;
+    }
+    
+    .FavouritePage_SwitchButton {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .FavouritePage {
+        padding: 15px;
+    }
+    
+    .FavouritePage_BookCardsList {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .FavouritePage_SwitchButtons {
+        flex-direction: column;
+        align-items: stretch; /* Растягиваем кнопки на всю ширину */
+    }
+    
+    .FavouritePage_SwitchButton {
+        width: 100%;
+        max-width: none;
+    }
+    
+    /* Улучшаем карточку на мобильных устройствах */
+    .UserBookstatusCard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .UserBookstatusCard_RigthPart {
+        width: 100%;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .UserBookstatusCard_BookTitle {
+        white-space: normal;
+    }
+}

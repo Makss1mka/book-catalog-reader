@@ -1,7 +1,13 @@
+from src.models.enums import ResponseStatus, ResponseDataType
 from src.models.entities import Review
+from typing import List, Optional, Any
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List, Optional
+
+class CommonResponseModel(BaseModel):
+    status: ResponseStatus
+    data_type: ResponseDataType
+    data: Any
 
 class ReviewResponseDTO(BaseModel):
     id: str

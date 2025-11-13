@@ -60,7 +60,6 @@ class UserBookStatusService:
         is_smth_changed = False
         if update_status_dto.status is not None:
             status.status = update_status_dto.status.value
-            status.end_page = -1
             is_smth_changed = True
         
         if is_smth_changed:
@@ -103,9 +102,6 @@ class UserBookStatusService:
             and self._user_context.user_id != status.user_id
         ):
             raise ForbiddenException("You don't have permission to modify this status")
-        
-        if status.status != UserBookStatusEnum.READING.value:
-            raise NoContentException("Cannot change end page, cause book is not in rigth user status")
         
         try:
             status.end_page = update_end_page.end_page

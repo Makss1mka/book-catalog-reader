@@ -44,9 +44,9 @@ AUTH_FREE_PATHS = {
     "user-service": "/users/refresh",
 }
 SERVICES_URLS = {
-    "user-service": "http://user-service:8083",
-    "book-service": "http://book-service:8082",
-    "review-service": "http://review-service:8084"
+    "user-service": "http://user-service:8084",
+    "book-service": "http://book-service:8083",
+    "review-service": "http://review-service:8085"
 }
 STATIC_NGINX_URL = "http://static-nginx"
 

@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, Request, Query, Response, UploadFile, File
-import uuid
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
-import logging
-
-from src.annotations import DatabaseSession, UserContext
-from src.models.response_dtos import BookPagesResponseDTO, BookPageResponseDTO, BookResponseDTO
-from src.models.enums import BookStatus, UserRole
 from src.services.book_file_service import BookFileService
+from src.models.enums import ResponseDataType, ResponseStatus
 from src.middlewares.access_control import require_access
+from src.models.response_dtos import CommonResponseModel
+from src.annotations import DatabaseSession, UserContext
+from src.models.enums import BookStatus, UserRole
+
+from fastapi import APIRouter, Request, Query, Response, UploadFile, File
+from fastapi.responses import JSONResponse
+import logging
+import uuid
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ book_file_router = APIRouter(prefix="/books", tags=["Book Files"])
 
 
 
-@book_file_router.post("/{book_id}/content", response_model=BookResponseDTO)
+@book_file_router.post("/{book_id}/content", response_class=JSONResponse, status_code=201)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     allowed_statuses=[BookStatus.WAIT_FILE, BookStatus.ON_MODERATE, BookStatus.PRIVATE, BookStatus.ON_APILATION, BookStatus.ACTIVE],
@@ -28,12 +29,17 @@ async def add_book_content_file(
     db: DatabaseSession,
     user_context: UserContext,
     file: UploadFile = File(...),
-) -> BookResponseDTO:
+):
     book_file_service = BookFileService(db)
-    return await book_file_service.set_content_file(book_id, file, user_context)
+
+    return CommonResponseModel(
+        status=ResponseStatus.SUCCESS,
+        data_type=ResponseDataType.JSON,
+        data=await book_file_service.set_content_file(book_id, file, user_context)
+    )
 
 
-@book_file_router.post("/{book_id}/cover", response_model=BookResponseDTO)
+@book_file_router.post("/{book_id}/cover", response_class=JSONResponse, status_code=201)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True
@@ -44,15 +50,18 @@ async def add_book_cover_file(
     db: DatabaseSession,
     user_context: UserContext,
     file: UploadFile = File(...)
-) -> BookResponseDTO:
+):
     book_file_service = BookFileService(db)
-    return await book_file_service.set_cover_file(book_id, file, user_context)
+
+    return CommonResponseModel(
+        status=ResponseStatus.SUCCESS,
+        data_type=ResponseDataType.JSON,
+        data=await book_file_service.set_cover_file(book_id, file, user_context)
+    )
 
 
 
-
-
-@book_file_router.get("/{book_id}/pages")
+@book_file_router.get("/{book_id}/pages", status_code=200)
 @require_access(
     allowed_roles=[UserRole.GUEST, UserRole.USER, UserRole.ADMIN],
     require_authentication=False
@@ -75,7 +84,7 @@ async def get_book_pages(
     )
 
 
-@book_file_router.get("/{book_id}/page/{page_number}")
+@book_file_router.get("/{book_id}/page/{page_number}", status_code=200)
 @require_access(
     allowed_roles=[UserRole.GUEST, UserRole.USER, UserRole.ADMIN],
     require_authentication=False
@@ -92,12 +101,12 @@ async def get_book_page(
 
     return Response(
         content=file_content,
-        media_type="application/pdf",
+        media_type="image/jpeg",
         headers={"Content-Disposition": f"attachment; filename={book_id}.pdf"}
     )
 
 
-@book_file_router.get("/{book_id}/file")
+@book_file_router.get("/{book_id}/file", status_code=200)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True
@@ -118,7 +127,7 @@ async def get_full_book_file(
     )
 
 
-@book_file_router.get("/{book_id}/cover")
+@book_file_router.get("/{book_id}/cover", status_code=200)
 @require_access(
     allowed_roles=[UserRole.USER, UserRole.ADMIN],
     require_authentication=True

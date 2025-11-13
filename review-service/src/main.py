@@ -7,6 +7,7 @@ from src.exceptions.code_exceptions import CodeException
 from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
     code_exception_handler,
+    exception_handler,
 )
 from src.middlewares.auth_middleware import UserContextMiddleware
 from src.globals import (
@@ -68,6 +69,7 @@ app.include_router(review_crud_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)
+app.add_exception_handler(Exception, exception_handler)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=APP_HOST, port=APP_PORT)

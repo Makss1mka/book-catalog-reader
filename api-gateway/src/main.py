@@ -5,6 +5,7 @@ from src.core.proxy_session_core import proxy_client_session_init
 from src.exceptions.code_exceptions import CodeException
 from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
+    exception_handler,
     code_exception_handler,
 )
 from src.globals import APP_HOST, APP_PORT, LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT
@@ -12,7 +13,7 @@ from src.globals import APP_HOST, APP_PORT, LOGS_LEVEL, LOGS_FILENAME, LOGS_FORM
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 import uvicorn
 import logging
@@ -41,8 +42,13 @@ app = FastAPI(lifespan=app_lifespan)
 app.include_router(auth_router)
 app.include_router(main_router)
 
+@app.get("/ping")
+async def ping():
+    return "pong"
+
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)
+app.add_exception_handler(Exception, exception_handler)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=APP_HOST, port=APP_PORT)

@@ -1,19 +1,20 @@
 from src.config.db_configs import DatabaseConfig, PoolConfig, ConnectionConfig
 from src.api.user_book_statuses_router import user_book_statuses_router
-from src.api.book_crud_router import book_crud_router
+from src.middlewares.auth_middleware import UserContextMiddleware
 from src.api.author_crud_router import author_crud_router
 from src.api.book_search_router import book_search_router
+from src.exceptions.code_exceptions import CodeException
+from src.api.book_crud_router import book_crud_router
 from src.api.book_file_router import book_file_router
-from src.api.likes_router import likes_router
 from src.api.status_router import status_router
 from src.core.logging_core import setup_logging
+from src.api.likes_router import likes_router
 from src.core.db_core import init_engine
-from src.exceptions.code_exceptions import CodeException
 from src.exceptions.exception_handlers import (
     pydantic_validation_exception_handler,
     code_exception_handler,
+    exception_handler,
 )
-from src.middlewares.auth_middleware import UserContextMiddleware
 from src.globals import (
     APP_HOST, APP_PORT,
     LOGS_LEVEL, LOGS_FILENAME, LOGS_FORMAT,
@@ -23,7 +24,7 @@ from src.globals import (
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 
 import uvicorn
 import logging
@@ -39,24 +40,20 @@ async def app_lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     logger: logging.Logger = logging.getLogger(__name__)
 
-    database_config = DatabaseConfig(
-        db_url=DB_URL,
-        db_username=DB_USER,
-        db_password=DB_PASSWORD,
-        db_host=DB_HOST,
-        db_name=DB_NAME
-    )
-    pool_config = PoolConfig(
-        echo=DB_ECHO_MODE,
-        hide_parameters=not DB_ECHO_MODE
-    )
-    connection_config = ConnectionConfig()
-
     await init_engine(
         app=app,
-        db_config=database_config,
-        pool_config=pool_config,
-        connection_config=connection_config
+        db_config=DatabaseConfig(
+            db_url=DB_URL,
+            db_username=DB_USER,
+            db_password=DB_PASSWORD,
+            db_host=DB_HOST,
+            db_name=DB_NAME
+        ),
+        pool_config=PoolConfig(
+            echo=DB_ECHO_MODE,
+            hide_parameters=not DB_ECHO_MODE
+        ),
+        connection_config=ConnectionConfig()
     )
 
     logger.info(f"Server is started on {APP_HOST}:{APP_PORT}")
@@ -78,6 +75,7 @@ app.include_router(book_file_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)
+app.add_exception_handler(Exception, exception_handler)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=APP_HOST, port=APP_PORT)

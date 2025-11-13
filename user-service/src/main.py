@@ -5,6 +5,7 @@ from src.core.logging_core import setup_logging
 from src.core.db_core import init_engine
 from src.exceptions.code_exceptions import CodeException
 from src.exceptions.exception_handlers import (
+    exception_handler,
     pydantic_validation_exception_handler,
     code_exception_handler,
 )
@@ -19,7 +20,7 @@ from src.globals import (
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 
 import uvicorn
 import logging
@@ -66,6 +67,7 @@ app.include_router(user_crud_router)
 
 app.add_exception_handler(RequestValidationError, pydantic_validation_exception_handler)
 app.add_exception_handler(CodeException, code_exception_handler)
+app.add_exception_handler(Exception, exception_handler)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=APP_HOST, port=APP_PORT)

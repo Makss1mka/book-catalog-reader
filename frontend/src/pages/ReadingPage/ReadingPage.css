@@ -1,0 +1,113 @@
+/* ReadingPage.css */
+.ReadingPage {
+    max-width: 1000px; /* Ширина области читалки */
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем все по горизонтали */
+}
+
+.ReadingPage_Header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.ReadingPage_PageIndicator {
+    font-size: 1rem;
+    color: #555;
+    font-style: italic;
+}
+
+.ReadingPage_Viewer {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Макс. ширина самой страницы */
+    min-height: 400px; /* Минимальная высота, чтобы было видно загрузку */
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Скрываем части изображения, если оно слишком большое */
+}
+
+.ReadingPage_Loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.ReadingPage_Image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Стили для плавной загрузки */
+.ReadingPage_Image.loading {
+    opacity: 0;
+}
+.ReadingPage_Image.loaded {
+    opacity: 1;
+}
+
+.ReadingPage_Controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px; /* Та же ширина, что и у просмотрщика */
+    margin-top: 20px;
+}
+
+.ReadingPage_Button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.ReadingPage_Button:hover {
+    background-color: #2980b9;
+}
+
+.ReadingPage_Button:active {
+    transform: scale(0.98);
+}
+
+/* --- СТИЛИ ДЛЯ ЗАБЛОКИРОВАННЫХ КНОПОК --- */
+.ReadingPage_Button:disabled {
+    background-color: #bdc3c7; /* Серый цвет */
+    color: #7f8c8d;
+    cursor: not-allowed; /* Курсор "запрещено" */
+    transform: none; /* Отключаем :active эффект */
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .ReadingPage {
+        padding: 10px;
+    }
+    
+    .ReadingPage_Viewer {
+        min-height: 300px;
+    }
+
+    .ReadingPage_Button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}

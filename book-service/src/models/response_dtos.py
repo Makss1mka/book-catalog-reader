@@ -1,11 +1,18 @@
-import logging
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from datetime import date
-from src.models.enums import BookStatus, AuthorProfileStatus
+from src.models.enums import BookStatus, AuthorProfileStatus, ResponseStatus, ResponseDataType
 from src.models.entities import Book, AuthorProfile, UserBookStatus
+from pydantic import BaseModel, Field
+from typing import Optional, List, Any
+from datetime import date
+import logging
 
 logger = logging.getLogger(__name__)
+
+
+class CommonResponseModel(BaseModel):
+    status: ResponseStatus
+    data_type: ResponseDataType
+    data: Any
+
 
 class AuthorProfileResponseDTO(BaseModel):
     id: str
@@ -45,17 +52,31 @@ class BookResponseDTO(BaseModel):
     likes_count: int
     pages_count: int
     reviews_count: int
+    is_liked_by_me: Optional[bool]
     author: Optional[AuthorProfileResponseDTO] = None
     
     @classmethod
-    def from_entity(cls, entity: Book, include_author: bool = False) -> 'BookResponseDTO':
+    def from_entity(cls, entity: Book, include_author: bool = False, count_likes: bool = None, current_user_id: str = None) -> 'BookResponseDTO':
+        is_liked_by_me = None
+        likes_count = 0
+
+        if count_likes == True and current_user_id != None:
+            is_liked_by_me = False
+
+            for like in entity.likers:
+                if like.user_id == current_user_id:
+                    is_liked_by_me = True
+                    break
+
+            likes_count = len(entity.likers)
+
         return cls(
             id=str(entity.id),
             author_id=str(entity.author_id),
             title=entity.title,
             description=entity.description,
             file_path=entity.file_path,
-            cover_path=entity.cover_path,
+            cover_path="/api/book-service/books/" + str(entity.id) + "/cover",
             genres=entity.genres or [],
             added_date=entity.added_date,
             status=entity.status,
@@ -63,6 +84,7 @@ class BookResponseDTO(BaseModel):
             likes_count=entity.likes_count,
             pages_count=entity.pages_count,
             reviews_count=entity.reviews_count,
+            is_liked_by_me=is_liked_by_me,
             author=AuthorProfileResponseDTO.from_entity(entity.author) if include_author and entity.author else None
         )
 

@@ -52,15 +52,12 @@ async def _auth_proxy(
 
             replace_trace_id(returned_headers)
 
-            logger.debug(resp.headers)
-            logger.debug(response_data)
-
-            if response.status == 200:
+            if response.status == 200 or response.status == 201:
                 response_data = json.loads(response_data)
 
                 resp.set_cookie(
                     TOKEN_COOKIE_NAME, 
-                    response_data["access_token"], 
+                    response_data["data"]["access_token"], 
                     max_age=TOKEN_COOKIE_MAX_AGE, 
                     secure=TOKEN_COOKIE_SECURE, 
                     httponly=TOKEN_COOKIE_HTTP_ONLY, 

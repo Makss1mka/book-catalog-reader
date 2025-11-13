@@ -27,6 +27,7 @@ class LikesService:
             book_id=book_id,
             user_id=self._user_context.user_id
         )
+        book.likes_count += 1
         
         try:
             self._db_session.add(book_like)
@@ -40,6 +41,10 @@ class LikesService:
         like_result = await self._db_session.execute(like_query)
         like = like_result.scalar_one_or_none()
         
+        book_query = select(Book).where(Book.id == book_id)
+        book_result = await self._db_session.execute(book_query)
+        book = book_result.scalar_one_or_none()
+
         if not like:
             raise NotFoundException("Like or review not found")
         
@@ -49,6 +54,7 @@ class LikesService:
         ):
             raise ForbiddenException("You don't have permission to delete this like")
         
+        book.likes_count -= 1
         await self._db_session.delete(like)
         await self._db_session.commit()
     

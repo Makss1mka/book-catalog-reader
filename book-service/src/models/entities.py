@@ -49,7 +49,7 @@ class UserBookStatus(Base):
     user_id = Column(UUID, primary_key=True)
     status = Column(String, nullable=False)
     added_date = Column(DateTime, nullable=False)
-    end_page = Column(Integer, nullable=False, default=-1)
+    end_page = Column(Integer, nullable=False, default=1)
 
     book = relationship("Book", back_populates="book_statuses", uselist=False)
 

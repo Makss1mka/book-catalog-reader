@@ -1,23 +1,26 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from fastapi import UploadFile
-from typing import Optional
-import aiofiles
-import asyncio
-import uuid
-import os
-import base64
-import logging
-import PyPDF2
-import io
-
-from src.models.entities import Book
-from src.models.response_dtos import BookPagesResponseDTO, BookPageResponseDTO, BookResponseDTO
-from src.models.enums import BookStatus
 from src.exceptions.code_exceptions import ForbiddenException, InternalServerErrorException, NotFoundException, BadRequestException
+from src.models.response_dtos import BookPagesResponseDTO, BookPageResponseDTO, BookResponseDTO
+from src.globals import BOOK_FILES_PATH_DIRECTORY, BOOK_COVERS_PATH_DIRECTORY
 from src.middlewares.access_control import check_resource_access
 from src.middlewares.auth_middleware import UserContext
-from src.globals import BOOK_FILES_PATH_DIRECTORY, BOOK_COVERS_PATH_DIRECTORY
+from src.models.enums import BookStatus
+from src.models.entities import Book
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from pdf2image import convert_from_bytes, convert_from_path
+from fastapi import HTTPException, UploadFile
+from sqlalchemy import select
+from typing import Optional
+from PIL import Image
+import aiofiles
+import logging
+import asyncio
+import PyPDF2
+import uuid
+import time
+import io
+import os
+
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +194,7 @@ class BookFileService:
         if page_number < 1 or page_number > book.pages_count:
             raise BadRequestException("Invalid page number")
         
-        return  await self._extract_pdf_pages(book.file_path, page_number, page_number)
+        return await self._extract_pdf_as_img(book, page_number)
     
     async def get_full_book_file(
         self,
@@ -273,3 +276,33 @@ class BookFileService:
         except Exception as e:
             logger.error(f"Error extracting PDF pages: {e}")
             raise BadRequestException("Error processing PDF file")
+
+    async def _extract_pdf_as_img(
+        self,
+        book: Book, 
+        page_number: int
+    ) -> Optional[bytes]:
+        if not os.path.exists(BOOK_FILES_PATH_DIRECTORY + book.file_path):
+            raise NotFoundException("Book file not found")
+            
+        if page_number < 1:
+            raise BadRequestException("Page number should be greater than 1")
+
+        try:
+            images = convert_from_bytes(
+                await self._extract_pdf_pages(book.file_path, page_number, page_number),
+                dpi=100
+            )
+            
+            if not images:
+                raise BadRequestException("Invalid page period. Pages not found.")
+            
+            image: Image.Image = images[0]
+            img_byte_arr = io.BytesIO()
+            image.save(img_byte_arr, format='JPEG') 
+            
+            return img_byte_arr.getvalue()
+        except Exception as e:
+            logger.exception(e)
+            raise HTTPException(status_code=500, detail="Some file exception")
+

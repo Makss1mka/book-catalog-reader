@@ -1,0 +1,91 @@
+/* ErrorPage.css */
+.ErrorPage {
+    max-width: 1200px;
+    width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+}
+
+.ErrorPage_Content {
+    background-color: #fefefe;
+    border: 1px solid #f9d8d8;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.1); /* Легкая тень красного цвета */
+}
+
+.ErrorPage_Icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.ErrorPage_Title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #c0392b; /* Более темный красный */
+    margin-bottom: 15px;
+}
+
+.ErrorPage_Message {
+    font-size: 1.1rem;
+    color: #34495e;
+    margin-bottom: 30px;
+    max-width: 600px;
+}
+
+.ErrorPage_Actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.ErrorPage_Button {
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+    display: inline-block; /* Для Link */
+}
+
+.ErrorPage_Button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+.ErrorPage_Button--Refresh {
+    background-color: #e74c3c;
+}
+
+.ErrorPage_Button--Refresh:hover {
+    background-color: #c0392b;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .ErrorPage {
+        width: 100%;
+        padding: 15px;
+    }
+    .ErrorPage_Content {
+        padding: 25px;
+    }
+    .ErrorPage_Title {
+        font-size: 1.5rem;
+    }
+    .ErrorPage_Icon {
+        font-size: 3rem;
+    }
+}

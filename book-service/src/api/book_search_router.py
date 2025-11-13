@@ -1,21 +1,23 @@
-from fastapi import APIRouter, Depends, Request, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional, List
+from src.annotations import DatabaseSession, UserContext, CommonParams
+from src.services.book_search_service import BookSearchService
+from src.models.enums import ResponseDataType, ResponseStatus
+from src.middlewares.access_control import require_access
+from src.models.response_dtos import CommonResponseModel
+from src.models.enums import UserRole
+
+from fastapi import APIRouter, Request, Query
+from fastapi.responses import JSONResponse
+from typing import Optional
 from datetime import datetime
 import logging
 
-from src.annotations import DatabaseSession, UserContext, CommonParams
-from src.models.response_dtos import BookSearchResponseDTO
-from src.models.enums import UserRole
-from src.services.book_search_service import BookSearchService
-from src.middlewares.access_control import require_access
 
 logger = logging.getLogger(__name__)
 
 book_search_router = APIRouter(tags=["Book Search"])
 
 
-@book_search_router.get("/books/search", response_model=BookSearchResponseDTO)
+@book_search_router.get("/books/search", response_class=JSONResponse, status_code=200)
 @require_access(
     allowed_roles=[UserRole.GUEST, UserRole.USER, UserRole.ADMIN],
     require_authentication=False
@@ -102,11 +104,16 @@ async def search_books(
         search_params['key'] = key
     
     search_service = BookSearchService(db)
-    return await search_service.search_books(
-        user_context=user_context,
-        search_params=search_params,
-        page_number=common_params['page_number'],
-        page_size=common_params['page_size'],
-        sort_by=common_params['sort_by'],
-        sort_order=common_params['sort_order']
+
+    return CommonResponseModel(
+        status=ResponseStatus.SUCCESS,
+        data_type=ResponseDataType.JSON,
+        data=await search_service.search_books(
+            user_context=user_context,
+            search_params=search_params,
+            page_number=common_params['page_number'],
+            page_size=common_params['page_size'],
+            sort_by=common_params['sort_by'],
+            sort_order=common_params['sort_order']
+        )
     )

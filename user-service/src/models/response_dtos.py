@@ -1,6 +1,13 @@
+from src.models.enums import ResponseStatus, ResponseDataType
 from src.models.entities import User
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
+
+
+class CommonResponseModel(BaseModel):
+    status: ResponseStatus
+    data_type: ResponseDataType
+    data: Any
 
 
 class UserResponseDTO(BaseModel):
@@ -37,10 +44,6 @@ class UserAuthResponseDTO(BaseModel):
 
 class AccessTokenResponseDTO(BaseModel):
     access_token: str
- 
-    @classmethod
-    def from_entity(cls, access_token: str) -> 'AccessTokenResponseDTO':
-        return cls(access_token=access_token)
 
 
 class StatusUpdateResponseDTO(BaseModel):

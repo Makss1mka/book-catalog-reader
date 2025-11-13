@@ -1,4 +1,25 @@
 services:
+  local-nginx:
+    build:
+      context: ./local-nginx
+    container_name: local-nginx
+    depends_on:
+      gateway:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    networks:
+      - backend
+
+  static-nginx:
+    build:
+      context: ./frontend
+    container_name: static-nginx
+    ports:
+      - 8081:8081
+    networks:
+      - backend
+
   redis:
     image: redis:7
     container_name: redis_server
@@ -38,7 +59,12 @@ services:
         APP_PORT: 
     container_name: "gateway"
     ports:
-      - "8080:8080"
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://gateway:8082/ping"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,7 +72,7 @@ services:
         condition: service_healthy
     environment:
       APP_HOST: "gateway"
-      APP_PORT: 8080
+      APP_PORT: 8082
       REDIS_HOST: ${GATEWAY_REDIS_HOST}
       REDIS_PORT: ${GATEWAY_REDIS_PORT}
       REFRESH_TOKEN_SECRET: ${GATEWAY_REFRESH_TOKEN_SECRET}
@@ -61,7 +87,7 @@ services:
         APP_PORT: 
     container_name: "book-service"
     ports:
-      - "8082:8082"
+      - "8083:8083"
     volumes:
       - ./books_files:/app/books_files
       - ./covers_files:/app/covers_files
@@ -72,7 +98,7 @@ services:
         condition: service_healthy
     environment:
       APP_HOST: "book-service"
-      APP_PORT: 8082
+      APP_PORT: 8083
       DB_URL: ${BOOK_SERVICE_DB_URL}
       DB_USER: ${BOOK_SERVICE_DB_USERNAME}
       DB_PASSWORD: ${BOOK_SERVICE_DB_PASSWORD}
@@ -88,7 +114,7 @@ services:
         APP_PORT: 
     container_name: "user-service"
     ports:
-      - "8083:8083"
+      - "8084:8084"
     depends_on:
       postgres:
         condition: service_healthy
@@ -96,7 +122,7 @@ services:
         condition: service_healthy
     environment:
       APP_HOST: "user-service"
-      APP_PORT: 8083
+      APP_PORT: 8084
       DB_URL: ${USER_SERVICE_DB_URL}
       DB_USER: ${USER_SERVICE_DB_USERNAME}
       DB_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
@@ -116,7 +142,7 @@ services:
         APP_PORT: 
     container_name: "review-service"
     ports:
-      - "8084:8084"
+      - "8085:8085"
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,7 +150,7 @@ services:
         condition: service_healthy
     environment:
       APP_HOST: "review-service"
-      APP_PORT: 8084
+      APP_PORT: 8085
       DB_URL: ${REVIEW_SERVICE_DB_URL}
       DB_USER: ${REVIEW_SERVICE_DB_USERNAME}
       DB_PASSWORD: ${REVIEW_SERVICE_DB_PASSWORD}

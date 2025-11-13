@@ -1,0 +1,73 @@
+/* NotFoundPage.css */
+.NotFoundPage {
+    max-width: 1200px;
+    width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем контент */
+    justify-content: center;
+    min-height: 50vh; /* Минимальная высота, чтобы не выглядело пусто */
+    text-align: center;
+}
+
+.NotFoundPage_Content {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.NotFoundPage_Icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.NotFoundPage_Title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #e74c3c; /* Красный цвет для ошибки */
+    margin-bottom: 15px;
+}
+
+.NotFoundPage_Message {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+}
+
+.NotFoundPage_Button {
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.NotFoundPage_Button:hover {
+    background-color: #2980b9;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .NotFoundPage {
+        width: 100%;
+        padding: 15px;
+    }
+    .NotFoundPage_Content {
+        padding: 25px;
+    }
+    .NotFoundPage_Title {
+        font-size: 1.5rem;
+    }
+    .NotFoundPage_Icon {
+        font-size: 3rem;
+    }
+}

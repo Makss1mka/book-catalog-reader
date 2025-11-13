@@ -76,6 +76,7 @@ class BookService:
         if include_author:
             query = query.options(selectinload(Book.author))
         
+        query = query.options(selectinload(Book.likers))
         result = await self.db_session.execute(query)
         book = result.scalar_one_or_none()
         
@@ -89,7 +90,7 @@ class BookService:
         ):
             raise HTTPException(status_code=403, detail=get_resource_access_response(book.status))
         
-        return BookResponseDTO.from_entity(book, include_author)
+        return BookResponseDTO.from_entity(book, include_author, True, user_context.user_id)
     
     async def update_book(
         self, 

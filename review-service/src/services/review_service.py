@@ -43,6 +43,7 @@ class ReviewService:
                 Review.user_id == self._user_context.user_id
             )
         )
+        my_review_query = my_review_query.options(selectinload(Review.likers))
         my_review_result = await self._db_session.execute(my_review_query)
         my_review = my_review_result.scalar_one_or_none()
 
@@ -70,7 +71,7 @@ class ReviewService:
         reviews = result.scalars().all()
         
         found_reviews = []
-        if my_review: 
+        if my_review and pagination["page_number"] == 1: 
             found_reviews.append(ReviewResponseDTO.from_entity(my_review, True, self._user_context.user_id))
         for i in reviews: 
             if i.user_id == self._user_context.user_id: continue

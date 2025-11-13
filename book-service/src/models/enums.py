@@ -28,3 +28,11 @@ class UserBookStatusEnum(str, Enum):
     READING = "READING"
     DROP = "DROP"
     LIKED = "LIKED"
+
+class ResponseStatus(str, Enum):
+    SUCCESS = "success"
+    EXCEPTION = "exception"
+
+class ResponseDataType(str, Enum):
+    STRING = "str"
+    JSON = "json"

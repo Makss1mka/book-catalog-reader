@@ -122,7 +122,7 @@ class AuthService:
 
 
     async def refresh(self, refresh_token_dto: RefreshTokenDTO) -> AccessTokenResponseDTO:
-        user_payload = self._decode_token(refresh_token_dto.refresh_token)
+        user_payload = self._decode_refresh_token(refresh_token_dto.refresh_token)
         user_id = user_payload["sub"]
 
         user_query = select(User).where(User.id == user_id)
@@ -133,5 +133,5 @@ class AuthService:
             raise NotFoundException("Cannot find user with such email.")
 
         return AccessTokenResponseDTO(
-            self._create_access_token(user)
+            access_token=self._create_access_token(user)
         )
